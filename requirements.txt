@@ -1,0 +1,12 @@
+# Core
+pyrogram
+tgcrypto-pyrofork
+
+# Utils
+phonenumbers
+dotenv
+loguru
+
+# Development
+pytest
+pytest-cov

@@ -1,0 +1,21 @@
+YOUR_REQUEST = "📍 Ваш запрос: {}"
+
+MENU_MESSAGE = "/menu"
+MENU_RESPONSE = "🏠 Главное меню \nВыберите нужный раздел 👇"
+
+VIDEO_NAME = "VIDEO"
+VIDEO_MESSAGE = "/video"
+VIDEO_RESPONSE = "🎬 Видео будущего\nВыберите раздел для работы с видео 👇"
+VIDEO_IMAGE_RESPONSE = "✅ {} изображение добавлено."
+
+GPT_NAME = "GPT"
+GPT_MESSAGE = "/gpt"
+GPT_RESPONSE = "💡 GPTs/Claude/Gemini\n\n🎙️ Голосом, ✍️ текстом, 🌅 изображением — задавайте любые вопросы удобным способом и SYNTX тут же найдёт решение + 🌐 выход в интернет (только 4 версия модели)."
+
+DESIGN_NAME = "DESIGN"
+DESIGN_MESSAGE = "/design"
+DESIGN_RESPONSE = "🎨 Дизайн с ИИ\nВыберите раздел для работы с изображением 👇"
+
+AUDIO_NAME = "AUDIO"
+AUDIO_MESSAGE = "/audio"
+AUDIO_RESPONSE = "🔊 Аудио с ИИ\nВыберите раздел для работы с аудио 👇"
