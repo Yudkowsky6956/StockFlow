@@ -7,6 +7,8 @@ VIDEO_NAME = "VIDEO"
 VIDEO_MESSAGE = "/video"
 VIDEO_RESPONSE = "🎬 Видео будущего\nВыберите раздел для работы с видео 👇"
 VIDEO_IMAGE_RESPONSE = "✅ {} изображение добавлено."
+VIDEO_IMAGE_RESPONSE_ONE = "✅ Изображение добавлено."
+VIDEO_URL_BUTTON = "🎞️ Настроить и запустить"
 
 GPT_NAME = "GPT"
 GPT_MESSAGE = "/gpt"

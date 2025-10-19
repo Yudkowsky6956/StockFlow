@@ -7,6 +7,7 @@ from pyrogram import Client, filters, handlers
 from pyrogram.enums import ParseMode
 from pyrogram.types import ChatEventFilter, InputMediaPhoto, Message
 
+from src.utils.sentances import wrap_by_words
 from .filters import is_replying_to
 
 
@@ -17,7 +18,7 @@ class TelegramBot:
     id = ""
 
     def __init__(self, client: Client):
-        default_logger.debug(f"Initializing TelegramBot with id = \"{self.id}\"")
+        default_logger.debug(f"Initializing TelegramBot with id = \"{self.id}\".")
         self._handlers = []
         self.client = client
 
@@ -49,20 +50,28 @@ class TelegramBot:
         return self._add_handler(func, handlers.EditedMessageHandler, filter_)
 
     @staticmethod
-    def _compose_log(text: Optional[str] = None, photo: Optional[Union[Path, List[Path]]] = None):
+    def _compose_log(text: Optional[str] = None, photo: Optional[Union[Path, List[Path]]] = None, shorten: bool = True):
+        photo_text = ""
+        if photo:
+            if isinstance(photo, Path):
+                photo_text = photo.name
+            elif isinstance(photo, list):
+                photo_text = ", ".join([_photo.name for _photo in photo.copy()])
         if text:
+            if shorten:
+                text = wrap_by_words(text, 25, "…")
             if isinstance(photo, list):
-                return f"text: \"{text}\", photos ({len(photo)}): \"{photo}\""
+                return f"text: \"{text}\", photos ({len(photo)}): \"{photo_text}\""
             elif isinstance(photo, Path):
-                return f"text: \"{text}\", photo: \"{photo}\""
+                return f"text: \"{text}\", photo: \"{photo_text}\""
             else:
                 return f"text: \"{text}\""
         else:
             if isinstance(photo, list):
-                return f"photos ({len(photo)}): \"{photo}\""
+                return f"photos ({len(photo)}): \"{photo_text}\""
             elif isinstance(photo, Path):
-                return f"photo: \"{photo}\""
-            return ""
+                return f"photo: \"{photo_text}\""
+            return "message"
 
     async def remove_handler(self, handler):
         """Removes Handler from Pyrogram and local memory"""
@@ -84,17 +93,17 @@ class TelegramBot:
     async def send_photos(self, photos: List[Path], text: Optional[str] = None, parse_mode=ParseMode.DISABLED, logger=default_logger) -> Message:
         """Sends photos and optional text and returns message"""
         media = self.compose_media(photos, text, parse_mode)
-        logger.debug(f"Sending message with {self._compose_log(text, photos)}")
+        logger.debug(f"Sending message with {self._compose_log(text, photos)}.")
         return (await self.client.send_media_group(self.id, media=media))[0]
 
     async def send_photo(self, photo: Path, text: Optional[str] = None, parse_mode=ParseMode.DISABLED, logger=default_logger) -> Message:
         """Sends photo and optional text and returns message"""
-        logger.debug(f"Sending message with {self._compose_log(text, photo)}")
+        logger.debug(f"Sending message with {self._compose_log(text, photo)}.")
         return await self.client.send_photo(self.id, str(photo), caption=text, parse_mode=parse_mode)
 
     async def send_text(self, text: str, parse_mode=ParseMode.DISABLED, logger=default_logger) -> Message:
         """Sends text and returns message"""
-        logger.debug(f"Sending message with {self._compose_log(text, None)}")
+        logger.debug(f"Sending message with {self._compose_log(text, None)}.")
         return await self.client.send_message(self.id, text, parse_mode=parse_mode)
 
     @classmethod
@@ -110,7 +119,7 @@ class TelegramBot:
 
     async def wait_for_future(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger) -> asyncio.Future:
         """Waits for Filter message to arrive/edit and returns future"""
-        logger.debug(f"Waiting response for {self._compose_log(message.text or message.caption, None)}")
+        logger.debug(f"Waiting response for {self._compose_log(message.text or message.caption, None)}.")
         future = asyncio.get_event_loop().create_future()
         local_handlers = []
 
@@ -118,7 +127,7 @@ class TelegramBot:
             """Finishes the wait_for function"""
             for h in local_handlers:
                 await self.remove_handler(h)
-            logger.debug(f"The response obtained for {self._compose_log(message.text or message.caption, None)}")
+            logger.debug(f"The response obtained for {self._compose_log(message.text or message.caption, None)}.")
             future.set_result(message)
             return message
 
@@ -142,5 +151,7 @@ class TelegramBot:
 
     async def download(self, message: Message, path: Path, logger=default_logger) -> Path:
         """Downloads file from Message and returns Path"""
-        logger.debug(f"Downloading media from message with {self._compose_log(message.text or message.caption, None)}")
-        return Path(await message.download(str(path), in_memory=False))
+        if message.media:
+            logger.debug(f"Downloading media from message with {self._compose_log(message.text or message.caption, None)}.")
+            return Path(await message.download(str(path), in_memory=False))
+        raise RuntimeError(f"Provided message with {self._compose_log(message.text or message.caption, None)} hasn't media to download.")

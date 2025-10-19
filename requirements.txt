@@ -1,8 +1,11 @@
 # Core
 pyrogram
 tgcrypto-pyrofork
+prefect
+playwright
 
 # Utils
+python-i18n[YAML]
 phonenumbers
 dotenv
 loguru

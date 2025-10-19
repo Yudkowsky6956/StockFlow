@@ -1,4 +1,3 @@
-import asyncio
 from typing import List, Optional
 
 from loguru import logger as default_logger

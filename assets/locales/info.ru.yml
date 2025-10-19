@@ -1,0 +1,9 @@
+ru:
+  video:
+    loading_photos: "Загрузка %{amount} фото…"
+    generating: 'Генерация видео…'
+    download: 'Скачивание видео…'
+    generation_end: 'Генерация видео завершена! ✔️'
+  gpt:
+    generating: 'Генерация текста…'
+    generation_end: 'Генерация завершена! ✔️'

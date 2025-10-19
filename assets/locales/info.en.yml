@@ -1,0 +1,9 @@
+en:
+  video:
+    loading_photos: "Loading %{amount} photos…"
+    generating: 'Generating video…'
+    download: 'Downloading video…'
+    generation_end: 'Video generation completed! ✔️'
+  gpt:
+    generating: 'Generating text…'
+    generation_end: 'Generation completed! ✔️'
