@@ -1,6 +1,6 @@
 en:
   video:
-    loading_photos: "Loading %{amount} photos…"
+    loading_photos: "Loading {amount} photos…"
     generating: 'Generating video…'
     download: 'Downloading video…'
     generation_end: 'Video generation completed! ✔️'

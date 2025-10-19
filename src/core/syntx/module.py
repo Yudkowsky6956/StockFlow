@@ -8,7 +8,7 @@ from pyrogram.types import Message
 
 from src.core.pyrogram.filters import contains
 from .exceptions import GenerationError
-from .asyncio import SyntxCurrentModule
+from .current_module import SyntxCurrentModule
 from .vars import *
 
 
@@ -18,6 +18,7 @@ class Module:
 
 class SyntxModule(Module):
     syntx_name = "NAME"
+    color = "#FFFFFF"
     semaphore: asyncio.Semaphore = asyncio.Semaphore(1)
     syntx_lock = asyncio.Lock()
     menu_message = MENU_MESSAGE
@@ -39,27 +40,32 @@ class SyntxModule(Module):
         pass
 
     @classmethod
+    async def _handle_generation_error(cls, e: GenerationError, name: str, logger=default_logger, *args, **kwargs):
+        if e.log:
+            logger.error(t(e.log), e.delay)
+
+        if e.mark:
+            # TODO: Сделать маркировку запросов
+            pass
+
+        if e.delay:
+            await asyncio.sleep(e.delay)
+            return await cls.run(*args, logger=logger, name=name, **kwargs)
+
+        if e.fatal:
+            raise
+
+
+    @classmethod
     @task(cache_policy=NO_CACHE)
-    async def generate(cls, *args, logger=default_logger, **kwargs):
+    async def run(cls, name: str, *args, logger=default_logger, **kwargs):
         try:
-            logger = logger.bind(module=cls.__name__)
+            logger = logger.bind(module_name=cls.syntx_name, module_color=cls.color)
             async with cls.semaphore:
                 return await cls._generate(*args, logger=logger, **kwargs)
 
         except GenerationError as e:
-            if e.log:
-                logger.error(t(e.log), e.delay)
-
-            if e.mark:
-                # TODO: Сделать маркировку запросов
-                pass
-
-            if e.delay:
-                await asyncio.sleep(e.delay)
-                return await cls.generate(*args, logger=logger, **kwargs)
-
-            if e.fatal:
-                raise
+            return await cls._handle_generation_error(e, *args, logger=logger, name=name, **kwargs)
 
 
 class CategoryModule(SyntxModule):

@@ -99,15 +99,17 @@ class VideoMiniApp(VideoModule):
         async with cls.syntx_lock:
             await cls.start()
             if photo:
-                start_generation_message, photo_message = await cls.load_photos(photo, logger)
+                start_generation_message, prompt_message = await cls.load_photos(photo, logger)
                 await cls._generate_from_photo(start_generation_message, prompt, logger)
+            else:
+                prompt_message = await cls.bot().send(text=prompt, logger=logger)
             logger.info(t("info.video.generating"))
-            message = await cls.bot().wait_for(
-                message=photo_message,
-                flt=contains(YOUR_REQUEST.format(prompt[:50])),
-                logger=logger
-            )
-            logger.info(t("info.video.generation_end"))
-            return message
+        message = await cls.bot().wait_for(
+            message=prompt_message,
+            flt=contains(YOUR_REQUEST.format(prompt[:50])),
+            logger=logger
+        )
+        logger.info(t("info.video.generation_end"))
+        return message
 
 

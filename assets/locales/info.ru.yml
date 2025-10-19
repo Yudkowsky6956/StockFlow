@@ -1,6 +1,6 @@
 ru:
   video:
-    loading_photos: "Загрузка %{amount} фото…"
+    loading_photos: "Загрузка {amount} фото…"
     generating: 'Генерация видео…'
     download: 'Скачивание видео…'
     generation_end: 'Генерация видео завершена! ✔️'

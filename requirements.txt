@@ -4,6 +4,10 @@ tgcrypto-pyrofork
 prefect
 playwright
 
+# Analyze
+plotly
+pandas
+
 # Utils
 python-i18n[YAML]
 phonenumbers

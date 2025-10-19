@@ -5,6 +5,7 @@ from .vars import *
 
 class Veo(VideoInBot):
     syntx_name = VEO_NAME
+    color = VEO_COLOR
     agent_message = VEO_MESSAGE
     agent_response = VEO_RESPONSE
     semaphore: asyncio.Semaphore = asyncio.Semaphore(VEO_BATCH_SIZE)
@@ -12,6 +13,7 @@ class Veo(VideoInBot):
 
 class Sora(VideoInBot):
     syntx_name = SORA_NAME
+    color = SORA_COLOR
     agent_message = SORA_MESSAGE
     agent_response = SORA_RESPONSE
     semaphore: asyncio.Semaphore = asyncio.Semaphore(SORA_BATCH_SIZE)
@@ -19,6 +21,7 @@ class Sora(VideoInBot):
 
 class Runway(VideoMiniApp):
     syntx_name = RUNWAY_NAME
+    color = RUNWAY_COLOR
     agent_message = RUNWAY_MESSAGE
     agent_response = RUNWAY_RESPONSE
     semaphore: asyncio.Semaphore = asyncio.Semaphore(RUNWAY_BATCH_SIZE)
