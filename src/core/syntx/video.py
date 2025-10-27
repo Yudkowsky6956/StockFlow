@@ -26,7 +26,7 @@ class VideoModule(AgentModule):
             photos = [photos]
         elif isinstance(photos, list):
             photos = photos[:cls.max_photos_per_batch]
-        logger.info(t(f"info.video.loading_photos", amount=len(photos)))
+        logger.info(t("info.video.loading_photos"), amount=len(photos))
         for index, photo in enumerate(photos, start=1):
             message, input_message = await cls.load_photo(photo, index, logger)
         return message, input_message
@@ -96,10 +96,10 @@ class VideoMiniApp(VideoModule):
         raise RuntimeError
 
     @classmethod
-    async def _generate_from_photo(cls, message: Message, logger, prompt: Optional[str] = None, ):
+    async def _generate_from_photo(cls, message: Message, logger, prompt: Optional[str] = None):
         url = await cls.get_generate_button(message)
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
+            browser = await p.chromium.launch(headless=debug)
             page = await browser.new_page()
             await page.goto(url)
             if prompt:
@@ -117,7 +117,7 @@ class VideoMiniApp(VideoModule):
             await cls.start()
             if photo:
                 start_generation_message, prompt_message = await cls.load_photos(photo, logger)
-                await cls._generate_from_photo(start_generation_message, prompt, logger)
+                await cls._generate_from_photo(start_generation_message, logger, prompt)
             else:
                 prompt_message = await cls.bot().send(text=prompt, logger=logger)
             generating_message = await cls.bot().wait_for(

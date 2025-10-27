@@ -5,6 +5,7 @@ import i18n
 from loguru import logger
 
 from src.utils.hash import get_color_hash
+import src.core.config as config
 from .vars import LOGS_FOLDER, LOCALES_FOLDER
 
 
@@ -37,12 +38,12 @@ def formatter(record):
     return f"{time} | {level}{extras_str} | {loc}{message}\n"
 
 
-def setup_logger(debug: bool = False, lang: str = "en"):
+def setup_logger():
     logger.remove()
 
     LOCALES_FOLDER.mkdir(parents=True, exist_ok=True)
     i18n.load_path.append(str(LOCALES_FOLDER))
-    i18n.set("locale", lang)
+    i18n.set("locale", config.LANG)
 
     LOGS_FOLDER.mkdir(parents=True, exist_ok=True)
     today = datetime.now().strftime("%Y-%m-%d")
@@ -71,6 +72,6 @@ def setup_logger(debug: bool = False, lang: str = "en"):
     logger.add(
         sys.stdout,
         format=formatter,
-        level="DEBUG" if debug else "INFO",
+        level="DEBUG" if config.DEBUG else "INFO",
         colorize=True
     )

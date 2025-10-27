@@ -7,21 +7,33 @@ ru:
   gpt:
     generating: 'Генерация текста…'
     generation_end: 'Генерация завершена! ✔️'
-  utils:
+  interface:
     select:
       folder: "Выберите папку"
       amount: "Выберите кол-во"
       string: "Впишите строку"
+      file: "Выберите файл"
       files: "Выберите файлы"
+      txt: "Выберите текстовый файл"
+      txt_filetype: "Текстовый"
       photos: "Выберите фото"
-      photos_small: "Фото"
+      photos_filetype: "Фото"
       videos: "Выберите видео"
-      videos_small: "Видео"
+      videos_filetype: "Видео"
       photos_videos: "Выберите фото/видео"
-      photos_videos_small: "Фото/видео"
+      photos_videos_filetype: "Фото/видео"
       video_folder: "Выберите папку для сохранения видео"
       photo_folder: "Выберите папку для сохранения фото"
       generations_amount: "Выберите кол-во генераций"
       database: "Выберите базу данных"
+  scripts:
+    import_prompts:
+      question: "Импортировать как оригинальные промпты (prompt) или как перефразированные промпты (alt_prompt)?"
+      original_answer: "Оригинальные"
+      paraphrased_answer: "Перефразированные"
+      success: "Импортировано {amount} строк типа \"{type}\" в колонки базы \"{database}\""
+    mark_files_as_done:
+      files_found: "Найдено {amount} файлов, подходящих под формат \"MODULE_HASH.jpg\" или \"MODULE_HASH.mp4\" (например \"VEO_6cbdab32.jpg\")."
+      marked_done: "Помечено как сделанные {amount} записей в базе \"{database}\"."
   database:
     imported_prompts: "Импортировано {amount} промптов."

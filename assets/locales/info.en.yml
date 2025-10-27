@@ -7,21 +7,33 @@ en:
   gpt:
     generating: 'Generating text…'
     generation_end: 'Generation completed! ✔️'
-  utils:
+  interface:
     select:
       folder: "Select folder"
       amount: "Select amount"
       string: "Enter string"
+      file: "Select file"
       files: "Select files"
+      txt: "Select text file"
+      txt_filetype: "Text"
       photos: "Select photos"
-      photos_small: "Photo"
+      photos_filetype: "Photo"
       videos: "Select videos"
-      videos_small: "Video"
+      videos_filetype: "Video"
       photos_videos: "Select photos/video"
-      photos_videos_small: "Photo/video"
+      photos_videos_filetype: "Photo/video"
       video_folder: "Select video saving directory"
       photo_folder: "Select photo saving directory"
       generations_amount: "Select generations amount"
       database: "Select database"
+  scripts:
+    import_prompts:
+      question: "Should program import as original prompts (prompt) or as paraphrased prompts (alt_prompt)?"
+      original_answer: "Original"
+      paraphrased_answer: "Paraphrased"
+      success: "Imported {amount} lines of type \"{type}\" in database \"{database}\""
+    mark_files_as_done:
+      files_found: "Found {amount} files that match format \"MODULE_HASH.jpg\" or \"MODULE_HASH.mp4\" (for example \"VEO_6cbdab32.jpg\")."
+      marked_done: "{amount} lines marked as done in database \"{database}\"."
   database:
     imported_prompts: "Imported {amount} prompts."

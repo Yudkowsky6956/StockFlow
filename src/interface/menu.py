@@ -4,9 +4,8 @@ import texteditor
 
 from src.flows import *
 from src.flows.vars import FLOWS_YML
-from src.utils.interface import import_prompts, import_hash
+from src.scripts import import_prompts, mark_files_as_done
 from src.utils.console import clear_last_lines
-
 
 
 BACK = "menu.back"
@@ -23,7 +22,7 @@ FLOWS_VIDEOS_FROM_PHOTOS = "menu.flows.videos_from_photos"
 
 SCRIPTS_MESSAGE = "menu.scripts.message"
 SCRIPTS_IMPORT_PROMPTS = "menu.scripts.import_prompts"
-SCRIPTS_IMPORT_HASH = "menu.scripts.import_hash"
+SCRIPTS_MARK_FILES_AS_DONE = "menu.scripts.mark_files_as_done"
 
 SETTINGS_MESSAGE = "menu.settings.message"
 SETTINGS_GLOBAL = "menu.settings.global"
@@ -86,7 +85,7 @@ def run_scripts_menu():
         choices_map={
             t(BACK): "back",
             t(SCRIPTS_IMPORT_PROMPTS): import_prompts,
-            t(SCRIPTS_IMPORT_HASH): import_hash
+            t(SCRIPTS_MARK_FILES_AS_DONE): mark_files_as_done
         }
     )
 

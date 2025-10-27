@@ -9,7 +9,9 @@ en:
     model_not_working: "Модель в данный момент недоступна. Попробую ещё раз через {delay} секунд."
     wait_until_next_request: "Запросы отправляются слишком быстро. Попробую ещё раз через {delay} секунд."
     on_update: "Данная модель находится на обновлении."
-  utils:
+  interface:
     select:
       folder_not_selected: "Папка не была выбрана."
+      files_not_selected: "Файлы не были выбраны."
+      file_not_selected: "Файл не был выбран."
   timeout_error: "Время ожидания завершения истекло."

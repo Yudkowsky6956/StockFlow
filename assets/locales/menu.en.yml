@@ -13,7 +13,7 @@ en:
   scripts:
     message: "Main menu ❯ Scripts"
     import_prompts: "Import prompts"
-    import_hash: "Import hash"
+    mark_files_as_done: "Mark files as done"
   settings:
     message: "Main menu ❯ Settings"
     global: "🌐 Global"

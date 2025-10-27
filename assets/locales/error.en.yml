@@ -9,7 +9,9 @@ en:
     model_not_working: "The model is currently unavailable. Will try again in %{delay} seconds."
     wait_until_next_request: "Requests are being sent too quickly. Will try again in %{delay} seconds."
     on_update: "Current model on update right now."
-  utils:
+  interface:
     select:
       folder_not_selected: "Folder wasn't selected."
+      files_not_selected: "Files weren't selected."
+      file_not_selected: "File wasn't selected."
   timeout_error: "Timeout error."

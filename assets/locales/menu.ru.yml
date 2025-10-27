@@ -14,7 +14,7 @@ ru:
   scripts:
     message: "Главное меню ❯ Скрипты"
     import_prompts: "Добавить промпты"
-    import_hash: "Добавить хэш"
+    mark_files_as_done: "Пометить файлы сделанными"
   settings:
     message: "Главное меню ❯ Настройки"
     global: "🌐 Глобальные"
