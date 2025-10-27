@@ -1,0 +1,17 @@
+ru:
+  basic:
+    name: "StockFlow"
+    back: "<- Назад"
+  main:
+    flows: "Сценарии"
+    scripts: "Скрипты"
+    settings: "Настройки"
+    exit: "Выход"
+  flows:
+    generate_videos: "Генерировать видео"
+  scripts:
+    import_prompts: "Добавить промяты"
+    import_hash: "Добавить хэш"
+  settings:
+    global: "Глобальные"
+    flows: "Сценарии"

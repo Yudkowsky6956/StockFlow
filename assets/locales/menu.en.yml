@@ -1,0 +1,17 @@
+en:
+  basic:
+    name: "StockFlow"
+    back: "<- Back"
+  main:
+    flows: "Flows"
+    scripts: "Scripts"
+    settings: "Settings"
+    exit: "Exit"
+  flows:
+    generate_videos: "Generate videos"
+  scripts:
+    import_prompts: "Import prompts"
+    import_hash: "Import hash"
+  settings:
+    global: "Global"
+    flows: "Flows"

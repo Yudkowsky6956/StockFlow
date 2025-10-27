@@ -1,13 +1,14 @@
 from typing import List, Optional
+import asyncio
 
 from loguru import logger as default_logger
-from pyrogram import Client
 from pyrogram.filters import AndFilter
 from pyrogram.types import Message
 
 from .module import SyntxModule
+from src.core.pyrogram.session import Session
 from src.core.pyrogram.bot import TelegramBot
-from src.core.pyrogram.filters import contains, is_replying_to
+from src.core.pyrogram.filters import contains, is_replying_to, message_exists
 from .errors import ALL_ERRORS, HandlerError
 from .exceptions import GenerationError
 
@@ -18,16 +19,19 @@ class SyntxBot(TelegramBot):
     name = "SyntxAI"
     id = "syntxaibot"
 
-    def __init__(self, client: Client):
-        super().__init__(client)
+    def __init__(self, session: Session = None, phone_number: str = None):
+        super().__init__(session, phone_number)
         SyntxModule.set_bot(self)
 
-    async def wait_for(self, flt: AndFilter, message: Optional[Message] = None, send: bool = True, edit: bool = True, reply: bool = False, logger=default_logger) -> Message:
-        future = await super().wait_for_future(flt, message, send, edit, reply, logger)
-        await self.add_error_handlers(message, future, [], logger)
+    async def wait_for(self, flt: AndFilter, message: Optional[Message] = None, send: bool = True, edit: bool = True, reply: bool = False, logger=default_logger, future=None, request_message=None) -> Message:
+        local_handlers = []
+        if not future:
+            future = asyncio.get_event_loop().create_future()
+        await self.add_error_handlers(message, future, local_handlers, logger, request_message)
+        future = await super().wait_for_future(flt, message, send, edit, reply, logger, future, local_handlers)
         return await future
 
-    async def add_error_handlers(self, original_message: Message, future, local_handlers: List, logger=default_logger):
+    async def add_error_handlers(self, original_message: Message, future, local_handlers: List, logger=default_logger, request_message=None):
         def _make_handler(err: HandlerError):
             async def handler(_, message):
                 for h in local_handlers:
@@ -36,7 +40,7 @@ class SyntxBot(TelegramBot):
                     if err.log:
                         if err.fatal:
                             logger.critical(err.log)
-                    future.set_exception(GenerationError(message.text, log=err.log, delay=err.delay, fatal=err.fatal, mark=err.mark))
+                    future.set_exception(GenerationError(message.text, log=err.log, delay=err.delay, fatal=err.fatal, mark=err.mark, lock=err.lock))
             return handler
 
         for err in ALL_ERRORS:
@@ -46,4 +50,6 @@ class SyntxBot(TelegramBot):
             else:
                 method = self.message_handler
                 flt = contains(err.message)
+                if request_message:
+                    flt = flt & ~message_exists(request_message)
             local_handlers.append(method(_make_handler(err), flt))

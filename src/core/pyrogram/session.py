@@ -50,8 +50,11 @@ class Session:
     session_folder = SESSION_FOLDER
     session_current = SESSION_CURRENT
 
-    def __init__(self, phone_number: str):
+    def __init__(self, phone_number: str = None):
         self._client = None
+
+        if not phone_number:
+            phone_number = self.current()
         self.phone_number = normalize_phone(phone_number)
 
     @client_error_handler
@@ -138,6 +141,10 @@ class Session:
         """Returns all session names in session folder"""
         cls.ensure_paths()
         return [file.stem for file in cls.session_folder.glob("*.session")]
+
+    @classmethod
+    def current(cls):
+        return SESSION_CURRENT.read_text()
 
     @classmethod
     def ensure_paths(cls):

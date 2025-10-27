@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 
 from loguru import logger as default_logger
 from pyrogram import Client, filters, handlers
+from src.core.pyrogram.session import Session
 from pyrogram.enums import ParseMode
 from pyrogram.types import ChatEventFilter, InputMediaPhoto, Message
 
@@ -17,10 +18,14 @@ class TelegramBot:
     name = ""
     id = ""
 
-    def __init__(self, client: Client):
+    def __init__(self, session: Session = None, phone_number: str = None):
         default_logger.debug(f"Initializing TelegramBot with id = \"{self.id}\".")
         self._handlers = []
-        self.client = client
+
+        if not session:
+            session = Session(phone_number=phone_number)
+        self.session = session
+        self.client = self.session.client
 
     def _add_handler(self, func, handler_cls, handler_filter=all):
         handler_filter = filters.chat(self.id) & handler_filter
@@ -117,18 +122,21 @@ class TelegramBot:
                 media.append(InputMediaPhoto(str(photo)))
         return media
 
-    async def wait_for_future(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger) -> asyncio.Future:
+    async def wait_for_future(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger, future=None, local_handlers=None) -> asyncio.Future:
         """Waits for Filter message to arrive/edit and returns future"""
         logger.debug(f"Waiting response for {self._compose_log(message.text or message.caption, None)}.")
-        future = asyncio.get_event_loop().create_future()
-        local_handlers = []
+        if not future:
+            future = asyncio.get_event_loop().create_future()
+        if not local_handlers:
+            local_handlers = []
 
         async def _finish_wait(_, message):
             """Finishes the wait_for function"""
             for h in local_handlers:
                 await self.remove_handler(h)
             logger.debug(f"The response obtained for {self._compose_log(message.text or message.caption, None)}.")
-            future.set_result(message)
+            if not future.done():
+                future.set_result(message)
             return message
 
         if reply:
@@ -139,9 +147,11 @@ class TelegramBot:
             local_handlers.append(self.edited_message_handler(_finish_wait, flt))
         return future
 
-    async def wait_for(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger) -> Message:
+    async def wait_for(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger, future=None) -> Message:
         """Waits for Filter message to arrive/edit and returns message"""
-        future = await self.wait_for_future(flt, message, send, edit, reply, logger)
+        if not future:
+            future = asyncio.get_event_loop().create_future()
+        future = await self.wait_for_future(flt, message, send, edit, reply, logger, future)
         return await future
 
     async def delete(self, message: Message, logger=default_logger):

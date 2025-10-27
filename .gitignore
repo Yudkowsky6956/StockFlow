@@ -4,4 +4,6 @@
 .idea
 sessions
 logs
-analyze
+analytics
+data
+*.db

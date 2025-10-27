@@ -1,7 +1,6 @@
 # Core
 pyrogram
 tgcrypto-pyrofork
-prefect
 playwright
 
 # Analyze

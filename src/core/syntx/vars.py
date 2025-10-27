@@ -1,5 +1,5 @@
 YOUR_REQUEST = "📍 Ваш запрос: {}"
-
+TARIFF = "Тариф:"
 MENU_MESSAGE = "/menu"
 MENU_RESPONSE = "🏠 Главное меню \nВыберите нужный раздел 👇"
 

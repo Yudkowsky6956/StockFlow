@@ -28,6 +28,11 @@ def contains(text: str):
             return flt.text in html.unescape(message.caption)
     return (filters.text | filters.caption) & filters.create(func, text=text)
 
+def message_exists(ext_message: Message):
+    async def func(flt, _, message: Message):
+        return not ext_message.empty
+    return filters.create(func, ext_message=ext_message)
+
 def equals(text: str):
     async def func(flt, _, message: Message):
         if message.text:

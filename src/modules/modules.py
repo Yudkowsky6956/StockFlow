@@ -10,6 +10,7 @@ class Veo(VideoInBot):
     agent_response = VEO_RESPONSE
     semaphore: asyncio.Semaphore = asyncio.Semaphore(VEO_BATCH_SIZE)
     max_photos_per_batch = VEO_MAX_PHOTOS_PER_BATCH
+    timeout = VEO_TIMEOUT
 
 class Sora(VideoInBot):
     syntx_name = SORA_NAME
@@ -18,6 +19,7 @@ class Sora(VideoInBot):
     agent_response = SORA_RESPONSE
     semaphore: asyncio.Semaphore = asyncio.Semaphore(SORA_BATCH_SIZE)
     max_photos_per_batch = SORA_MAX_PHOTOS_PER_BATCH
+    timeout = SORA_TIMEOUT
 
 class Runway(VideoMiniApp):
     syntx_name = RUNWAY_NAME
@@ -26,3 +28,5 @@ class Runway(VideoMiniApp):
     agent_response = RUNWAY_RESPONSE
     semaphore: asyncio.Semaphore = asyncio.Semaphore(RUNWAY_BATCH_SIZE)
     max_photos_per_batch = RUNWAY_MAX_PHOTOS_PER_BATCH
+    cancel_button = RUNWAY_CANCEL_BUTTON
+    timeout = RUNWAY_TIMEOUT

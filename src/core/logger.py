@@ -1,10 +1,10 @@
 import sys
 from datetime import datetime
-import logging
 
 import i18n
 from loguru import logger
 
+from src.utils.hash import color_hash
 from .vars import LOGS_FOLDER, LOCALES_FOLDER
 
 
@@ -22,7 +22,7 @@ def formatter(record):
     module_name = record["extra"].get("module_name", "")
     module_color = record["extra"].get("module_color", "#FFFFFF")
     name = record["extra"].get("name", "")
-    name_color = record["extra"].get("name_color", "#FFFFFF")
+    name_color = color_hash(name)
 
     extras = []
     if module_name:
@@ -37,12 +37,12 @@ def formatter(record):
     return f"{time} | {level}{extras_str} | {loc}{message}\n"
 
 
-def setup_logger(debug=False):
+def setup_logger(debug: bool = False, lang: str = "en"):
     logger.remove()
-    logging.getLogger("prefect").setLevel(logging.WARNING)
 
     LOCALES_FOLDER.mkdir(parents=True, exist_ok=True)
     i18n.load_path.append(str(LOCALES_FOLDER))
+    i18n.set("locale", lang)
 
     LOGS_FOLDER.mkdir(parents=True, exist_ok=True)
     today = datetime.now().strftime("%Y-%m-%d")
