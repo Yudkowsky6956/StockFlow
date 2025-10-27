@@ -1,4 +1,9 @@
-generate_videos:
+GenerateVideosFromPrompts:
   database: "shutterstock_1025"
   modules: ["VEO", "RUNWAY"]
   amount: 1000
+
+GenerateVideosFromPhotos:
+  database: "photos"
+  modules: ["VEO", "RUNWAY"]
+  prompt: ""

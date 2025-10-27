@@ -7,3 +7,21 @@ ru:
   gpt:
     generating: 'Генерация текста…'
     generation_end: 'Генерация завершена! ✔️'
+  utils:
+    select:
+      folder: "Выберите папку"
+      amount: "Выберите кол-во"
+      string: "Впишите строку"
+      files: "Выберите файлы"
+      photos: "Выберите фото"
+      photos_small: "Фото"
+      videos: "Выберите видео"
+      videos_small: "Видео"
+      photos_videos: "Выберите фото/видео"
+      photos_videos_small: "Фото/видео"
+      video_folder: "Выберите папку для сохранения видео"
+      photo_folder: "Выберите папку для сохранения фото"
+      generations_amount: "Выберите кол-во генераций"
+      database: "Выберите базу данных"
+  database:
+    imported_prompts: "Импортировано {amount} промптов."

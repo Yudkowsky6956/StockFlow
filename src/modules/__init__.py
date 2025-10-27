@@ -7,5 +7,5 @@ MODULES_DICT = {
 }
 
 
-def get_modules_by_names(names):
+def get_modules_objects(names):
     return [MODULES_DICT.get(name) for name in names]

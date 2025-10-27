@@ -7,3 +7,21 @@ en:
   gpt:
     generating: 'Generating text…'
     generation_end: 'Generation completed! ✔️'
+  utils:
+    select:
+      folder: "Select folder"
+      amount: "Select amount"
+      string: "Enter string"
+      files: "Select files"
+      photos: "Select photos"
+      photos_small: "Photo"
+      videos: "Select videos"
+      videos_small: "Video"
+      photos_videos: "Select photos/video"
+      photos_videos_small: "Photo/video"
+      video_folder: "Select video saving directory"
+      photo_folder: "Select photo saving directory"
+      generations_amount: "Select generations amount"
+      database: "Select database"
+  database:
+    imported_prompts: "Imported {amount} prompts."

@@ -1,17 +1,20 @@
 en:
-  basic:
-    name: "StockFlow"
-    back: "<- Back"
+  back: "🡄 Back"
   main:
-    flows: "Flows"
-    scripts: "Scripts"
-    settings: "Settings"
-    exit: "Exit"
+    message: "Main menu"
+    flows: "▶️ Flows"
+    scripts: "📜 Scripts"
+    settings: "⚙️ Settings"
+    exit: "⛔  Exit"
   flows:
-    generate_videos: "Generate videos"
+    message: "Main menu ❯ Flows"
+    videos_from_prompts: "Videos from prompts"
+    videos_from_photos: "Videos from photos"
   scripts:
+    message: "Main menu ❯ Scripts"
     import_prompts: "Import prompts"
     import_hash: "Import hash"
   settings:
-    global: "Global"
-    flows: "Flows"
+    message: "Main menu ❯ Settings"
+    global: "🌐 Global"
+    flows: "▶️ Flows"

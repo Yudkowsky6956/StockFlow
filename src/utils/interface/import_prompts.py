@@ -1,8 +1,8 @@
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox
+from tkinter import filedialog, messagebox
 
-from .select import select_database
 from src.core.database import Database
+from src.interface.select import select_database
 
 
 def import_prompts():

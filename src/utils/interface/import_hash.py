@@ -3,11 +3,11 @@ from loguru import logger
 from pathlib import Path
 
 from src.core.database import Database
-from .select import select_images_and_videos, select_database
+from src.interface.select import select_photos_and_videos, select_database
 
 
 def import_hash():
-    files = [Path(file) for file in select_images_and_videos()]
+    files = [Path(file) for file in select_photos_and_videos()]
 
     prepare_list = []
     for file in files:

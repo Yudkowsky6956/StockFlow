@@ -2,6 +2,7 @@ import threading
 from typing import List, Optional
 from collections import namedtuple
 
+from i18n import t
 from loguru import logger
 from sqlalchemy import (
     create_engine,
@@ -16,7 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, Session
 
-from src.utils.hash import short_hash
+from src.utils.hash import get_short_hash
 from .vars import DATABASE_FOLDER
 
 
@@ -82,11 +83,13 @@ class Database:
 
             rows = session.execute(query).scalars().all()
 
-            return [
+            rows = [
                 PromptRecord(r.prompt, r.alt_prompt, r.hash)
                 for r in rows
                 if r.alt_prompt is not None
             ]
+            logger.info(t("info.database.imported_prompts"), amount=len(rows))
+            return rows
 
     def count_rows(self, include_error: bool = True) -> int:
         with Session(self.engine) as session:
@@ -134,7 +137,7 @@ class Database:
 
         self.logger.info(f"Generating hashes for {total} entries")
         for i, row in enumerate(rows, start=1):
-            row.hash = short_hash(row.alt_prompt)
+            row.hash = get_short_hash(row.alt_prompt)
             self.logger.info(f"{i}/{total} hashed")
 
         session.commit()

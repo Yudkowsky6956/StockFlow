@@ -1,17 +1,21 @@
 ru:
-  basic:
-    name: "StockFlow"
-    back: "<- Назад"
+  back: "🡄 Назад"
   main:
-    flows: "Сценарии"
-    scripts: "Скрипты"
-    settings: "Настройки"
-    exit: "Выход"
+    message: "Главное меню"
+    flows: "▶️ Сценарии"
+    scripts: "📜 Скрипты"
+    settings: "⚙️ Настройки"
+    exit: "⛔  Выход"
   flows:
-    generate_videos: "Генерировать видео"
+    message: "Главное меню ❯ Сценарии"
+    videos_from_prompts: "Видео из промптов"
+    videos_from_photos: "Видео из фото"
+    videos: "Генерировать видео"
   scripts:
-    import_prompts: "Добавить промяты"
+    message: "Главное меню ❯ Скрипты"
+    import_prompts: "Добавить промпты"
     import_hash: "Добавить хэш"
   settings:
-    global: "Глобальные"
-    flows: "Сценарии"
+    message: "Главное меню ❯ Настройки"
+    global: "🌐 Глобальные"
+    flows: "▶️ Сценарии"

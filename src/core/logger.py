@@ -4,7 +4,7 @@ from datetime import datetime
 import i18n
 from loguru import logger
 
-from src.utils.hash import color_hash
+from src.utils.hash import get_color_hash
 from .vars import LOGS_FOLDER, LOCALES_FOLDER
 
 
@@ -22,7 +22,7 @@ def formatter(record):
     module_name = record["extra"].get("module_name", "")
     module_color = record["extra"].get("module_color", "#FFFFFF")
     name = record["extra"].get("name", "")
-    name_color = color_hash(name)
+    name_color = get_color_hash(name)
 
     extras = []
     if module_name:

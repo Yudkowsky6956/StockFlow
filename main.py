@@ -1,7 +1,7 @@
 import argparse
 
 from src.core.logger import setup_logger
-from src.core.menu import start_menu
+from src.interface.menu import run_main_menu
 
 
 
@@ -23,5 +23,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     setup_logger(args.debug, args.lang)
 
-    start_menu()
+    run_main_menu()
 
