@@ -1,4 +1,3 @@
-from .flows import (
-    GenerateVideosFromPrompts,
-    GenerateVideosFromPhotos
-)
+from .videos_from_prompts import GenerateVideosFromPrompts
+from .videos_from_photos import GenerateVideosFromPhotos
+from .core_flow import Flow

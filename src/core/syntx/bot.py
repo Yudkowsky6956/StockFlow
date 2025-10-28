@@ -32,15 +32,15 @@ class SyntxBot(TelegramBot):
         return await future
 
     async def add_error_handlers(self, original_message: Message, future, local_handlers: List, logger=default_logger, request_message=None):
-        def _make_handler(err: HandlerError):
+        def _make_handler(error: HandlerError):
             async def handler(_, message):
                 for h in local_handlers:
                     await self.remove_handler(h)
                 if not future.done():
-                    if err.log:
-                        if err.fatal:
-                            logger.critical(err.log)
-                    future.set_exception(GenerationError(message.text, log=err.log, delay=err.delay, fatal=err.fatal, mark=err.mark, lock=err.lock))
+                    if error.log:
+                        if error.fatal:
+                            logger.critical(error.log)
+                    future.set_exception(GenerationError(message.text, log=error.log, delay=error.delay, fatal=error.fatal, mark=error.mark, lock=error.lock))
             return handler
 
         for err in ALL_ERRORS:

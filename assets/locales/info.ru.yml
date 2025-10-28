@@ -1,3 +1,4 @@
+#file: noinspection SpellCheckingInspection
 ru:
   video:
     loading_photos: "Загрузка {amount} фото…"
@@ -8,10 +9,17 @@ ru:
     generating: 'Генерация текста…'
     generation_end: 'Генерация завершена! ✔️'
   interface:
+    ask:
+      integer: "Введите целое число"
+      not_negative_integer": "Введите целое не отрицательное число"
+      amount: "Введите кол-во"
+      string: "Введите строку"
+      generations_amount: "Введите кол-во генераций"
+      database: "Выберите базу данных"
+      ask_new_database: "Введите имя новой базы данных (без .db)"
+      new_database: "➕  Новая база данных"
     select:
       folder: "Выберите папку"
-      amount: "Выберите кол-во"
-      string: "Впишите строку"
       file: "Выберите файл"
       files: "Выберите файлы"
       txt: "Выберите текстовый файл"
@@ -24,13 +32,12 @@ ru:
       photos_videos_filetype: "Фото/видео"
       video_folder: "Выберите папку для сохранения видео"
       photo_folder: "Выберите папку для сохранения фото"
-      generations_amount: "Выберите кол-во генераций"
-      database: "Выберите базу данных"
   scripts:
     import_prompts:
       question: "Импортировать как оригинальные промпты (prompt) или как перефразированные промпты (alt_prompt)?"
       original_answer: "Оригинальные"
       paraphrased_answer: "Перефразированные"
+      prompts_selected: "{amount} строк было найдено в файле \"{filename}\""
       success: "Импортировано {amount} строк типа \"{type}\" в колонки базы \"{database}\""
     mark_files_as_done:
       files_found: "Найдено {amount} файлов, подходящих под формат \"MODULE_HASH.jpg\" или \"MODULE_HASH.mp4\" (например \"VEO_6cbdab32.jpg\")."

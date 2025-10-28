@@ -1,21 +1,25 @@
 ru:
   back: "🡄 Назад"
   main:
-    message: "Главное меню"
+    name: "Главное меню"
     flows: "▶️ Сценарии"
     scripts: "📜 Скрипты"
     settings: "⚙️ Настройки"
     exit: "⛔  Выход"
   flows:
-    message: "Главное меню ❯ Сценарии"
-    videos_from_prompts: "Видео из промптов"
-    videos_from_photos: "Видео из фото"
+    name: "Сценарии"
+    GenerateVideosFromPrompts: "Видео из промптов"
+    GenerateVideosFromPhotos: "Видео из фото"
     videos: "Генерировать видео"
   scripts:
-    message: "Главное меню ❯ Скрипты"
+    name: "Скрипты"
     import_prompts: "Добавить промпты"
     mark_files_as_done: "Пометить файлы сделанными"
   settings:
-    message: "Главное меню ❯ Настройки"
+    name: "Настройки"
     global: "🌐 Глобальные"
     flows: "▶️ Сценарии"
+  global_settings:
+    name: "Глобальные"
+  flows_settings:
+    name: "Сценарии"

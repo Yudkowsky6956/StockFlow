@@ -1,0 +1,19 @@
+en:
+  default:
+    database:
+      name: "Database"
+      description: "Database that module uses."
+    modules:
+      name: "Modules"
+      description: "Modules that module uses."
+    amount:
+      name: "Generations amount"
+      descriptions: "Amount of generations that module"
+
+  GenerateVideosFromPrompts:
+    name: "Videos from prompts"
+    choice: "Video from prompts"
+
+  GenerateVideosFromPhotos:
+    name: "Videos from photos"
+    choice: "Video from photos"

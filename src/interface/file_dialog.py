@@ -1,10 +1,9 @@
-from pathlib import Path
-
-from loguru import logger
-from i18n import t
-
 import tkinter as tk
-from tkinter import filedialog, simpledialog
+from pathlib import Path
+from tkinter import filedialog
+
+from i18n import t
+from loguru import logger
 
 
 def _get_root():
@@ -21,14 +20,6 @@ def select_folder(title: str = "info.interface.select.folder", **kwargs) -> Path
     if folder:
         return Path(folder)
     raise RuntimeError(t("error.interface.select.folder_not_selected"))
-
-def select_amount(title: str = "info.interface.select.amount", prompt: str = "info.interface.select.amount", **kwargs) -> int:
-    """Общая функция для выбора кол-ва."""
-    return simpledialog.askinteger(title=t(title), prompt=t(prompt), parent=_get_root(), **kwargs)
-
-def select_string(title: str = "info.interface.select.string", prompt: str = "info.interface.select.string", **kwargs) -> str:
-    """Общая функция для выбора строки."""
-    return simpledialog.askstring(title=t(title), prompt=t(prompt), parent=_get_root(), **kwargs)
 
 def select_files(title: str = "info.interface.select.files", **kwargs):
     """Общая функция для выбора файлы."""
@@ -69,11 +60,3 @@ def select_video_folder(title: str = "info.interface.select.video_folder"):
 def select_photo_folder(title: str = "info.interface.select.photo_folder"):
     """Выбор папки для сохранения фотографий."""
     return select_folder(title=t(title))
-
-def select_generation_amount(title: str = "info.interface.select.generations_amount"):
-    """Выбор кол-ва генераций."""
-    return select_amount(title=t(title), prompt=t(title), initialvalue=1000, minvalue=0)
-
-def select_database(title: str = "info.interface.select.database"):
-    """Выбор базы данных."""
-    return select_string(title=t(title), prompt=t(title))

@@ -6,9 +6,10 @@ from playwright.async_api import async_playwright
 from pyrogram.types import Message
 
 from src.core.pyrogram.filters import contains
+import src.core.global_config as config
 from .module import AgentModule
 from .vars import *
-from ...modules.vars import EMPTY_PROMPT
+from src.modules.vars import EMPTY_PROMPT
 
 
 class VideoModule(AgentModule):
@@ -99,7 +100,7 @@ class VideoMiniApp(VideoModule):
     async def _generate_from_photo(cls, message: Message, logger, prompt: Optional[str] = None):
         url = await cls.get_generate_button(message)
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=debug)
+            browser = await p.chromium.launch(headless=not config.DEBUG)
             page = await browser.new_page()
             await page.goto(url)
             if prompt:

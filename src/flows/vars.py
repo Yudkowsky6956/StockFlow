@@ -1,4 +1,4 @@
-from pathlib import Path
+from src.core.vars import CONFIG_FOLDER
 
 
-FLOWS_YML = Path("flows.yml")
+FLOWS_YML = CONFIG_FOLDER / "flows.yml"

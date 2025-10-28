@@ -1,8 +1,8 @@
 import argparse
 
 from src.core.logger import setup_logger
-from src.interface.menu import run_main_menu
-import src.core.config as config
+from src.interface.menu import MainMenu
+import src.core.global_config as config
 
 
 if __name__ == '__main__':
@@ -25,5 +25,5 @@ if __name__ == '__main__':
     config.LANG = args.lang
     setup_logger()
 
-    run_main_menu()
+    MainMenu.run()
 

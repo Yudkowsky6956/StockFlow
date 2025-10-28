@@ -11,10 +11,8 @@ from sqlalchemy import (
     String,
     Boolean,
     select,
-    update,
     func
 )
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, Session
 
 from src.utils.hash import get_short_hash
@@ -54,7 +52,7 @@ class Database:
         self.logger.debug(f"DB initialized at {db_path}")
 
         # Лог количества строк
-        with Session(self.engine) as session:
+        with Session(self.engine):
             self.logger.debug(f"Current rows in DB: {self.count_rows()}")
 
     # ---------------------------
@@ -147,7 +145,7 @@ class Database:
     # ---------------------------
     # Флаги
     # ---------------------------
-    def mark_error(self, value: str, type: str = "hash"):
+    def mark_error(self, value: str, _type: str = "hash"):
         with Session(self.engine) as session:
             row = session.execute(
                 select(PromptEntry).where(
@@ -160,11 +158,11 @@ class Database:
             if row:
                 row.error = True
             else:
-                kwargs = {type: value, "error": True}
+                kwargs = {_type: value, "error": True}
                 session.add(PromptEntry(**kwargs))
             session.commit()
 
-    def mark_done(self, value: str, module: str, type: str = "hash"):
+    def mark_done(self, value: str, module: str, _type: str = "hash"):
         with Session(self.engine) as session:
             row = session.execute(
                 select(PromptEntry).where(
@@ -177,7 +175,7 @@ class Database:
             if row:
                 setattr(row, module, True)
             else:
-                kwargs = {type: value, module: True}
+                kwargs = {_type: value, module: True}
                 session.add(PromptEntry(**kwargs))
             session.commit()
 

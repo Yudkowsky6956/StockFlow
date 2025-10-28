@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from loguru import logger as default_logger
-from pyrogram import Client, filters, handlers
+from pyrogram import filters, handlers
 from src.core.pyrogram.session import Session
 from pyrogram.enums import ParseMode
 from pyrogram.types import ChatEventFilter, InputMediaPhoto, Message
@@ -130,14 +130,14 @@ class TelegramBot:
         if not local_handlers:
             local_handlers = []
 
-        async def _finish_wait(_, message):
+        async def _finish_wait(_, _message):
             """Finishes the wait_for function"""
             for h in local_handlers:
                 await self.remove_handler(h)
-            logger.debug(f"The response obtained for {self._compose_log(message.text or message.caption, None)}.")
+            logger.debug(f"The response obtained for {self._compose_log(_message.text or _message.caption, None)}.")
             if not future.done():
-                future.set_result(message)
-            return message
+                future.set_result(_message)
+            return _message
 
         if reply:
             flt = flt & is_replying_to(message)

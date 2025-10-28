@@ -4,7 +4,8 @@ from i18n import t
 from pathlib import Path
 
 from src.core.database import Database
-from src.interface.select import select_photos_and_videos, select_database
+from src.interface.file_dialog import select_photos_and_videos
+from src.interface.console_dialog import ask_database
 
 
 def mark_files_as_done():
@@ -20,7 +21,7 @@ def mark_files_as_done():
     if not prepare_list:
         return
 
-    db_name = select_database()
+    db_name = ask_database()
     if not db_name:
         return
     db = Database(db_name)

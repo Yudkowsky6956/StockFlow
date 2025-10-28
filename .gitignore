@@ -7,3 +7,4 @@ logs
 analytics
 data
 *.db
+*.run

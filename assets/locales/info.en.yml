@@ -1,3 +1,4 @@
+#file: noinspection SpellCheckingInspection
 en:
   video:
     loading_photos: "Loading {amount} photos…"
@@ -8,10 +9,17 @@ en:
     generating: 'Generating text…'
     generation_end: 'Generation completed! ✔️'
   interface:
+    ask:
+      integer: "Enter integer"
+      not_negative_integer": "Enter not negative integer"
+      amount: "Enter amount"
+      string: "Enter string"
+      generations_amount: "Enter generations amount"
+      database: "Select database"
+      ask_new_database: "Enter database name (without .db)"
+      new_database: "➕  New database"
     select:
       folder: "Select folder"
-      amount: "Select amount"
-      string: "Enter string"
       file: "Select file"
       files: "Select files"
       txt: "Select text file"
@@ -24,13 +32,12 @@ en:
       photos_videos_filetype: "Photo/video"
       video_folder: "Select video saving directory"
       photo_folder: "Select photo saving directory"
-      generations_amount: "Select generations amount"
-      database: "Select database"
   scripts:
     import_prompts:
       question: "Should program import as original prompts (prompt) or as paraphrased prompts (alt_prompt)?"
       original_answer: "Original"
       paraphrased_answer: "Paraphrased"
+      prompts_selected: "{amount} lines was found in \"{filename}\""
       success: "Imported {amount} lines of type \"{type}\" in database \"{database}\""
     mark_files_as_done:
       files_found: "Found {amount} files that match format \"MODULE_HASH.jpg\" or \"MODULE_HASH.mp4\" (for example \"VEO_6cbdab32.jpg\")."

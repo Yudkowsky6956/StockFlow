@@ -1,102 +1,76 @@
-from InquirerPy import inquirer
-from i18n import t
-import texteditor
-
-from src.flows import *
-from src.flows.vars import FLOWS_YML
+from .core_menu import Menu
+from src.flows import GenerateVideosFromPrompts, GenerateVideosFromPhotos
 from src.scripts import import_prompts, mark_files_as_done
-from src.utils.console import clear_last_lines
 
 
-BACK = "menu.back"
+class GlobalSettings(Menu):
+    GLOBAL_MESSAGE = "menu.global_settings.name"
 
-MAIN_MESSAGE = "menu.main.message"
-MAIN_FLOWS = "menu.main.flows"
-MAIN_SCRIPTS = "menu.main.scripts"
-MAIN_SETTINGS = "menu.main.settings"
-MAIN_EXIT = "menu.main.exit"
-
-FLOWS_MESSAGE = "menu.flows.message"
-FLOWS_VIDEOS_FROM_PROMPTS = "menu.flows.videos_from_prompts"
-FLOWS_VIDEOS_FROM_PHOTOS = "menu.flows.videos_from_photos"
-
-SCRIPTS_MESSAGE = "menu.scripts.message"
-SCRIPTS_IMPORT_PROMPTS = "menu.scripts.import_prompts"
-SCRIPTS_MARK_FILES_AS_DONE = "menu.scripts.mark_files_as_done"
-
-SETTINGS_MESSAGE = "menu.settings.message"
-SETTINGS_GLOBAL = "menu.settings.global"
-SETTINGS_FLOWS = "menu.settings.flows"
+    name = GLOBAL_MESSAGE
+    choices_map = Menu.DEFAULT_CHOICES | {
+    }
 
 
-def menu(message: str, choices_map: dict, default_choice: str | None = None):
-    """
-    Универсальная функция для меню.
+class FlowSettings(Menu):
+    FLOWS_MESSAGE = "menu.flows_settings.name"
+    FLOWS_VIDEOS_FROM_PROMPTS = "menu.flows.GenerateVideosFromPrompts"
+    FLOWS_VIDEOS_FROM_PHOTOS = "menu.flows.GenerateVideosFromPhotos"
 
-    :param message: Заголовок меню.
-    :param choices_map: Словарь {"элемент": функция}.
-    :param default_choice: Элемент меню, выбранный по умолчанью.
-    :return:
-    """
-    while True:
-        choices = list(choices_map.keys())
-        choice = inquirer.select(
-            message=f"{t(message)}:",
-            choices=choices,
-            default=default_choice or choices[0],
-        ).execute()
-        clear_last_lines(amount=1)
-
-        action = choices_map.get(choice)
-        if callable(action):
-            action()
-        elif action == "back":
-            break
+    name = FLOWS_MESSAGE
+    choices_map = Menu.DEFAULT_CHOICES | {
+        FLOWS_VIDEOS_FROM_PROMPTS: GenerateVideosFromPrompts.run_menu,
+        FLOWS_VIDEOS_FROM_PHOTOS: GenerateVideosFromPhotos.run_menu
+    }
 
 
+class SettingsMenu(Menu):
+    SETTINGS_MESSAGE = "menu.settings.name"
+    SETTINGS_GLOBAL = "menu.settings.global"
+    SETTINGS_FLOWS = "menu.settings.flows"
 
-def run_main_menu():
-    """Запускает главное меню StockFlow"""
-    menu(
-        message=t(MAIN_MESSAGE),
-        choices_map={
-            t(MAIN_FLOWS): run_flows_menu,
-            t(MAIN_SCRIPTS): run_scripts_menu,
-            t(MAIN_SETTINGS): run_settings_menu,
-            t(MAIN_EXIT): lambda: exit(0)
-        }
-    )
+    name = SETTINGS_MESSAGE
+    choices_map = Menu.DEFAULT_CHOICES | {
+        SETTINGS_GLOBAL: GlobalSettings.run,
+        SETTINGS_FLOWS: FlowSettings.run
+    }
 
 
-def run_flows_menu():
-    menu(
-        message=t(FLOWS_MESSAGE),
-        choices_map={
-            t(BACK): "back",
-            t(FLOWS_VIDEOS_FROM_PROMPTS): GenerateVideosFromPrompts.run,
-            t(FLOWS_VIDEOS_FROM_PHOTOS): GenerateVideosFromPhotos.run
-        }
-    )
+class FlowsMenu(Menu):
+    FLOWS_MESSAGE = "menu.flows.name"
+    FLOWS_VIDEOS_FROM_PROMPTS = "menu.flows.GenerateVideosFromPrompts"
+    FLOWS_VIDEOS_FROM_PHOTOS = "menu.flows.GenerateVideosFromPhotos"
+
+    name = FLOWS_MESSAGE
+    choices_map = Menu.DEFAULT_CHOICES | {
+        FLOWS_VIDEOS_FROM_PROMPTS: GenerateVideosFromPrompts.run,
+        FLOWS_VIDEOS_FROM_PHOTOS: GenerateVideosFromPhotos.run
+    }
 
 
-def run_scripts_menu():
-    menu(
-        message=t(SCRIPTS_MESSAGE),
-        choices_map={
-            t(BACK): "back",
-            t(SCRIPTS_IMPORT_PROMPTS): import_prompts,
-            t(SCRIPTS_MARK_FILES_AS_DONE): mark_files_as_done
-        }
-    )
+class ScriptsMenu(Menu):
+    SCRIPTS_MESSAGE = "menu.scripts.name"
+    SCRIPTS_IMPORT_PROMPTS = "menu.scripts.import_prompts"
+    SCRIPTS_MARK_FILES_AS_DONE = "menu.scripts.mark_files_as_done"
+
+    name = SCRIPTS_MESSAGE
+    choices_map = Menu.DEFAULT_CHOICES | {
+        SCRIPTS_IMPORT_PROMPTS: import_prompts,
+        SCRIPTS_MARK_FILES_AS_DONE: mark_files_as_done
+    }
 
 
-def run_settings_menu():
-    menu(
-        message=t(SETTINGS_MESSAGE),
-        choices_map={
-            t(BACK): "back",
-            t(SETTINGS_GLOBAL): "",
-            t(SETTINGS_FLOWS): lambda: texteditor.open(filename=FLOWS_YML)
-        }
-    )
+class MainMenu(Menu):
+    MAIN_MESSAGE = "menu.main.name"
+    MAIN_FLOWS = "menu.main.flows"
+    MAIN_SCRIPTS = "menu.main.scripts"
+    MAIN_SETTINGS = "menu.main.settings"
+    MAIN_EXIT = "menu.main.exit"
+
+    name = MAIN_MESSAGE
+    choices_map = {
+        MAIN_FLOWS: FlowsMenu.run,
+        MAIN_SCRIPTS: ScriptsMenu.run,
+        MAIN_SETTINGS: SettingsMenu.run,
+        MAIN_EXIT: lambda: exit(0)
+    }
 

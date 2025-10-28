@@ -5,7 +5,7 @@ import i18n
 from loguru import logger
 
 from src.utils.hash import get_color_hash
-import src.core.config as config
+import src.core.global_config as config
 from .vars import LOGS_FOLDER, LOCALES_FOLDER
 
 

@@ -1,20 +1,22 @@
 en:
   back: "🡄 Back"
   main:
-    message: "Main menu"
+    name: "Main menu"
     flows: "▶️ Flows"
     scripts: "📜 Scripts"
     settings: "⚙️ Settings"
     exit: "⛔  Exit"
   flows:
-    message: "Main menu ❯ Flows"
-    videos_from_prompts: "Videos from prompts"
-    videos_from_photos: "Videos from photos"
+    name: "Flows"
   scripts:
-    message: "Main menu ❯ Scripts"
+    name: "Scripts"
     import_prompts: "Import prompts"
     mark_files_as_done: "Mark files as done"
   settings:
-    message: "Main menu ❯ Settings"
+    name: "Settings"
     global: "🌐 Global"
     flows: "▶️ Flows"
+  global_settings:
+    name: "Global"
+  flows_settings:
+    name: "Flows"

@@ -1,0 +1,19 @@
+ru:
+  default:
+    database:
+      name: "База данных"
+      description: "База данных, которую использует сценарий."
+    modules:
+      name: "Модули"
+      description: "Модули, которые используются сценарием."
+    amount:
+      name: "Количество генераций"
+      descriptions: "Количество генераций, которое нужно сделать данному сценарию."
+
+  GenerateVideosFromPrompts:
+    name: "Видео из промптов"
+    choice: "Видео из промптов"
+
+  GenerateVideosFromPhotos:
+    name: "Видео из фото"
+    choice: "Видео из фото"
