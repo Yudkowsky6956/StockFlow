@@ -2,12 +2,13 @@ en:
   handlers:
     block: "The request contains \"forbidden\" content, skipping it."
     too_short: "The request is too short, skipping it."
-    block_full: "Access to the tool is blocked. Will try again in %{delay} seconds."
-    request_limit: "The limit of simultaneous requests has been reached. Will try again in %{delay} seconds."
-    you_already_load_image: "Two images have already been loaded into the video generator. Will try again in %{delay} seconds."
-    no_tool: "One module interrupted the start of another. Will try again in %{delay} seconds."
-    model_not_working: "The model is currently unavailable. Will try again in %{delay} seconds."
-    wait_until_next_request: "Requests are being sent too quickly. Will try again in %{delay} seconds."
+    block_full: "Access to the tool is blocked. Will try again in {delay} seconds."
+    you_already_load_image: "Two images have already been loaded into the video generator. Will try again in {delay} seconds."
+    wait_until_next_request: "Requests are being sent too quickly. Will try again in {delay} seconds."
+    model_not_working: "The model is currently unavailable. Will try again in {delay} seconds."
+    request_limit: "The limit of simultaneous requests has been reached. Will try again in {delay} seconds."
+    no_tool: "One module interrupted the start of another. Will try again in {delay} seconds."
+    please_wait: "Model asks to wait. Will try again in {delay} seconds."
     on_update: "Current model on update right now."
   interface:
     select:

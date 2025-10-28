@@ -34,8 +34,9 @@ BLOCK_4 = HandlerError(
 )
 BLOCK_5 = HandlerError(
     message="Операция была отменена модератором сервиса.",
-    log="error.handlers.moderation_error",
-    mark=True
+    log="error.handlers.block",
+    mark=True,
+    reply=True
 )
 TOO_SHORT = HandlerError(
     message="Ошибка: too short",
@@ -48,12 +49,6 @@ BLOCK_FULL = HandlerError(
     log="error.handlers.block_full",
     lock=True
 )
-MODEL_ERROR_1 = HandlerError(
-    message="Временные неполадки в работе нейросети. Пожалуйста, попробуйте немного позже.",
-    delay=5*60,
-    log="error.handlers.model_not_working",
-    lock=True
-)
 YOU_ALREADY_LOAD_IMAGE = HandlerError(
     message="⚠️ Вы уже загрузили изображение, пожалуйста удалите его и/или отправьте текстовой запрос для старта генерации 👇",
     delay=20,
@@ -63,6 +58,12 @@ WAIT_UNTIL_NEXT_REQUEST = HandlerError(
     message="Запросы отправляются слишком быстро.",
     delay=5,
     log="error.handlers.wait_until_next_request",
+    lock=True
+)
+MODEL_ERROR_1 = HandlerError(
+    message="Временные неполадки в работе нейросети. Пожалуйста, попробуйте немного позже.",
+    delay=5*60,
+    log="error.handlers.model_not_working",
     lock=True
 )
 MODEL_ERROR_2 = HandlerError(
