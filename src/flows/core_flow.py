@@ -1,40 +1,47 @@
 import asyncio
-from i18n import t
+import inspect
 
 import yaml
-from loguru import logger
+from i18n import t
 
 from src.interface import Menu
-from src.core.database import Database
-from src.interface.console_dialog import ask_database
+from src.interface.console_dialog import ask_database, ask_generation_amount, ask_string, ask_video_modules
 from .vars import FLOWS_YML
+from src.modules import ALL_MODULES
 
 
 class Flow:
     NAME = "flow"
 
+    DEFAULT_CHOICE: dict = {"menu.back": "back"}
+    CONFIG_PARAMETERS = []
+    ASK_HANDLERS = {
+        "database": ask_database,
+        "gen_amount": ask_generation_amount,
+        "video_modules": ask_video_modules,
+        "prompt": ask_string,
+        "pre_template": ask_string,
+        "post_template": ask_string
+    }
+
     @classmethod
     def run(cls) -> list:
         """
         Синхронная точка входа в сценарий.
-
-        :return: Список результатов сценария.
+        Возвращает список результатов сценария.
         """
         tasks = []
         config = cls.get_config()
-        db_name = ask_database()
-        database = Database(db_name)
-
-        return asyncio.run(cls._run(tasks, config, database))
+        result = asyncio.run(cls._run(tasks, config))
+        return result
 
     @classmethod
-    async def _run(cls, tasks: list, config: dict, database: Database) -> list:
+    async def _run(cls, tasks: list, config: dict) -> list:
         """
         Backend-функция входа в сценарий, которую нужно перегружать в дочерних функциях.
 
         :param tasks: Список задач сценария.
         :param config: Конфигурация сценария.
-        :param database: База данных сценария.
         :return: Список результатов сценария.
         """
 
@@ -64,27 +71,42 @@ class Flow:
         return ConfigMenu.run()
 
     @classmethod
-    def set_database(cls, long_instruction=None):
-        if long_instruction:
-            long_instruction = t(long_instruction)
-        config = cls.get_global_config()
-        config[cls.__name__]["database"] = ask_database(default=config.get("database"), long_instruction=long_instruction, back=True)
-        cls.set_global_config(config)
-
-    @classmethod
-    def set_property(cls, parameter, func, long_instruction=None):
-        if long_instruction:
-            long_instruction = t(long_instruction)
-        config = cls.get_global_config()
-        config[cls.__name__][parameter] = func(default=config.get(parameter), long_instruction=long_instruction, back=True)
-        cls.set_global_config(config)
-
-
-    @classmethod
     def get_settings_choices(cls):
-        return {
-            "menu.back": "back"
+        choices = cls.DEFAULT_CHOICE.copy()
+        for parameter in cls.CONFIG_PARAMETERS:
+            name = cls.get_config_parameter_locale(parameter, "name")
+            description = cls.get_config_parameter_locale(parameter, "description")
+            choices[name] = lambda p=parameter, d=description: cls.set_property(parameter=p, description=d)
+        return choices
+
+    @classmethod
+    def set_property(cls, parameter: str, description: str = None):
+        """
+        Универсальный метод для установки свойства через соответствующий ask-интерфейс.
+        """
+        if description:
+            description = t(description)
+
+        config = cls.get_global_config()
+        local_config = config.setdefault(cls.__name__, {})
+
+        ask_fn = cls.ASK_HANDLERS.get(parameter)
+        if not ask_fn:
+            raise ValueError(f"Неизвестный параметр: {parameter}")
+
+        # Определяем, поддерживает ли функция параметр 'back'
+        sig = inspect.signature(ask_fn)
+        kwargs = {
+            "default": local_config.get(parameter),
+            "long_instruction": description,
         }
+        if "back" in sig.parameters:
+            kwargs["back"] = True
+
+        new_value = ask_fn(**kwargs)
+
+        local_config[parameter] = new_value
+        cls.set_global_config(config)
 
     @classmethod
     def get_choices_with_data(cls):

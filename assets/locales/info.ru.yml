@@ -8,6 +8,7 @@ ru:
   gpt:
     generating: 'Генерация текста…'
     generation_end: 'Генерация завершена! ✔️'
+    invalid_conversation_url: "Устаревший URL диалога."
   interface:
     ask:
       integer: "Введите целое число"
@@ -18,6 +19,7 @@ ru:
       database: "Выберите базу данных"
       ask_new_database: "Введите имя новой базы данных (без .db)"
       new_database: "➕  Новая база данных"
+      video_modules: "Выберите видео-модули"
     select:
       folder: "Выберите папку"
       file: "Выберите файл"
@@ -43,4 +45,9 @@ ru:
       files_found: "Найдено {amount} файлов, подходящих под формат \"MODULE_HASH.jpg\" или \"MODULE_HASH.mp4\" (например \"VEO_6cbdab32.jpg\")."
       marked_done: "Помечено как сделанные {amount} записей в базе \"{database}\"."
   database:
+    ensure_hash:
+      rows_found: "Найдено {amount} строк в которых нужно создать хэш."
+      start: "Начинаю создание хэшей..."
+      progress: "Выполнено {percent}% ({processed}/{total}): заполнен hash до id={last_id}"
+      done: "Создание хэшей завершено."
     imported_prompts: "Импортировано {amount} промптов."

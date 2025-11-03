@@ -1,9 +1,8 @@
 from i18n import t
 from InquirerPy import inquirer
 
+import asyncio
 import inspect
-
-from loguru import logger
 
 from src.utils.console import clear_last_lines
 
@@ -48,7 +47,10 @@ class Menu:
 
                 action = cls.get_choices_map().get(choice)
                 if callable(action):
-                    action()
+                    if inspect.iscoroutinefunction(action):
+                        asyncio.run(action())
+                    else:
+                        action()
                 elif action == "back":
                     break
             except KeyboardInterrupt:

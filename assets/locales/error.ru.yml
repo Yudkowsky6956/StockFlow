@@ -16,3 +16,4 @@ ru:
       files_not_selected: "Файлы не были выбраны."
       file_not_selected: "Файл не был выбран."
   timeout_error: "Время ожидания завершения истекло."
+  wrong_conversation_url: "Устаревший URL диалога! Обнови его в \"Скрипты -> Обновить URL диалога\"."

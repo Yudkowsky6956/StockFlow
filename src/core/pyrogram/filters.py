@@ -3,6 +3,10 @@ import html
 from pyrogram import filters
 from pyrogram.types import Message
 
+def always_true():
+    async def func(flt, _, message: Message):
+        return True
+    return filters.create(func)
 
 def startswith(text: str):
     async def func(flt, _, message: Message):

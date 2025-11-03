@@ -1,6 +1,13 @@
-from .modules import Veo, Runway, Sora
+from .modules import Veo, Runway, Sora, GPT
 
-MODULES_DICT = {
+ALL_MODULES = {
+    "GPT": GPT,
+    "VEO": Veo,
+    "RUNWAY": Runway,
+    "SORA": Sora
+}
+
+VIDEO_MODULES = {
     "VEO": Veo,
     "RUNWAY": Runway,
     "SORA": Sora
@@ -8,4 +15,7 @@ MODULES_DICT = {
 
 
 def get_modules_objects(names):
-    return [MODULES_DICT.get(name) for name in names]
+    if isinstance(names, list):
+        return [ALL_MODULES.get(name) for name in names]
+    else:
+        return ALL_MODULES.get(names)

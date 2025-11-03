@@ -50,7 +50,7 @@ BLOCK_FULL = HandlerError(
     lock=True
 )
 YOU_ALREADY_LOAD_IMAGE = HandlerError(
-    message="⚠️ Вы уже загрузили изображение, пожалуйста удалите его и/или отправьте текстовой запрос для старта генерации 👇",
+    message="⚠ Вы уже загрузили изображение, пожалуйста удалите его и/или отправьте текстовой запрос для старта генерации 👇",
     delay=20,
     log="error.handlers.you_already_load_image",
 )
@@ -81,13 +81,13 @@ REQUEST_LIMIT = HandlerError(
     lock=True
 )
 NO_TOOL = HandlerError(
-    message="⚠️ Не выбран инструмент для работы с чат-ботом.",
+    message="⚠ Не выбран инструмент для работы с чат-ботом.",
     delay=20,
     log="error.handlers.no_tool",
     reply=False
 )
 PLEASE_WAIT = HandlerError(
-    message="⚠️ Пожалуйста, подождите",
+    message="перед отправкой следующего запроса.",
     delay=5,
     log="error.handlers.please_wait",
     lock=True

@@ -45,11 +45,14 @@ class SyntxBot(TelegramBot):
 
         for err in ALL_ERRORS:
             if err.reply:
-                method = self.edited_message_handler
+                method = self.message_handler
+                method_edited = self.edited_message_handler
                 flt = contains(err.message) & is_replying_to(original_message)
             else:
                 method = self.message_handler
+                method_edited = self.edited_message_handler
                 flt = contains(err.message)
                 if request_message:
                     flt = flt & ~message_exists(request_message)
             local_handlers.append(method(_make_handler(err), flt))
+            local_handlers.append(method_edited(_make_handler(err), flt))

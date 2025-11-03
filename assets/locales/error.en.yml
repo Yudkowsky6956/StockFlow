@@ -16,3 +16,4 @@ en:
       files_not_selected: "Files weren't selected."
       file_not_selected: "File wasn't selected."
   timeout_error: "Timeout error."
+  wrong_conversation_url: "Wrong conversation URL! Change it in Utils -> Update conversation URL"

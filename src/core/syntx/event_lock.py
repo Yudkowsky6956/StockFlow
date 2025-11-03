@@ -1,5 +1,7 @@
 import asyncio
 
+import loguru
+
 
 class EventLock:
     def __init__(self):

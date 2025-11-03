@@ -1,0 +1,145 @@
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+import json
+
+from pyrogram.types import Message
+import aiohttp
+from bs4 import BeautifulSoup
+from i18n import t
+
+from src.core.pyrogram.filters import has_inline_button
+from .module import CategoryModule
+from .vars import GPT_NAME, GPT_MESSAGE, GPT_RESPONSE, GPT_VIEW_FULL_DIALOG
+from .exceptions import GenerationError
+
+
+class GPTModule(CategoryModule):
+    syntx_name = GPT_NAME
+    category_message = GPT_MESSAGE
+    category_response = GPT_RESPONSE
+
+    URL_CHECK_FLAG = False
+
+
+    @classmethod
+    async def _generate(cls, prompt: str, logger, photo: Path | list[Path] | None = None):
+        async with cls.syntx_lock:
+            await cls.start()
+            prompt_message = await cls.bot().send(text=prompt, logger=logger, photo=photo)
+            logger.info(t("info.gpt.generating"))
+            after_time = cls.get_time()
+        message = await cls.bot().wait_for(
+            flt=has_inline_button(GPT_VIEW_FULL_DIALOG),
+            message=prompt_message,
+            reply=True
+        )
+        url = await cls.get_button_url(message, GPT_VIEW_FULL_DIALOG)
+        message_text = await cls.get_answer_text(prompt_message, after_time, url)
+        logger.info(t("info.gpt.generation_end"))
+        return message_text
+
+    @classmethod
+    async def _run(cls, name: str, logger, prompt: str, database, photo: Path | list[Path] | None = None):
+        prompt = f"{name} {prompt}"
+        return await cls._generate(prompt=prompt, photo=photo, logger=logger)
+
+    @staticmethod
+    def get_time():
+        tz = timezone(timedelta(hours=3))
+        return datetime.now(tz) - timedelta(seconds=3)
+
+    @staticmethod
+    async def get_soup(url: str):
+        headers = {"Range": "bytes=-2000"}
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                response.raise_for_status()
+                text = await response.text()
+        return BeautifulSoup(text, "html.parser")
+
+    @staticmethod
+    async def get_answer_text(message, after_time, url):
+        text = message.text or message.caption
+        soup = await GPTModule.get_soup(url)
+        questions = soup.find_all("div", class_="message userquestion")[-25:]
+
+        found_message_later = False
+
+        for q in questions:
+            for btn in q.find_all("button", class_="copy-message-button"):
+                btn.decompose()
+            q_text = q.get_text(strip=True)
+
+            if text not in q_text:
+                continue
+
+            time_tag = q.find("i", class_="bi-clock-history")
+            if time_tag and time_tag.next_sibling:
+                time_str = time_tag.next_sibling.strip()
+                try:
+                    msg_dt = datetime.strptime(time_str, "%d.%m.%Y %H:%M:%S GMT%z")
+                except ValueError:
+                    continue
+
+                if after_time and msg_dt < after_time:
+                    found_message_later = True
+                    continue
+
+            answer_block = q.find_next("div", class_="message answer")
+            if not answer_block:
+                continue
+
+            json_code = answer_block.find("code", class_="language-json")
+            if not json_code:
+                continue
+
+            json_text = json_code.get_text(strip=True)
+            return json.loads(json_text)
+
+        raise GenerationError(
+            t("error.wrong_conversation_id"),
+            fatal=True
+        )
+    #
+    # @classmethod
+    # async def request_new_conversation_url(cls) -> str:
+    #     prompt_message = await cls.bot().send(text=str(cls.get_time()))
+    #     message = await cls.bot().wait_for(
+    #         flt=has_inline_button(GPT_VIEW_FULL_DIALOG),
+    #         message=prompt_message,
+    #         reply=True
+    #     )
+    #     return await cls.get_button_url(message, GPT_VIEW_FULL_DIALOG)
+    #
+    # @classmethod
+    # async def check_conversation_url(cls):
+    #     url = get_conversation_url()
+    #     if not await cls._check_conversation_url(url):
+    #         logger.warning(t("info.gpt.invalid_conversation_url"))
+    #         url = await cls.request_new_conversation_url()
+    #         set_conversation_url(url)
+    #
+    # @classmethod
+    # async def _check_conversation_url(cls, url: str):
+    #     if not url:
+    #         return False
+    #     if not validators.url(url):
+    #         return False
+    #     prompt_message = await cls.bot().send(text=cls.get_time())
+    #     after_time = cls.get_time()
+    #     await cls.bot().wait_for(
+    #         flt=has_inline_button(GPT_VIEW_FULL_DIALOG),
+    #         message=prompt_message,
+    #         reply=True
+    #     )
+    #     try:
+    #         cls.get_answer_text(prompt_message, after_time)
+    #     except GenerationError:
+    #         return False
+    #     return True
+
+
+
+
+
+

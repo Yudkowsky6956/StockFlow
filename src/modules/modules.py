@@ -1,4 +1,6 @@
 import asyncio
+
+from src.core.syntx.gpt import GPTModule
 from src.core.syntx.video import VideoInBot, VideoMiniApp
 from .vars import *
 
@@ -30,3 +32,8 @@ class Runway(VideoMiniApp):
     max_photos_per_batch = RUNWAY_MAX_PHOTOS_PER_BATCH
     cancel_button = RUNWAY_CANCEL_BUTTON
     timeout = RUNWAY_TIMEOUT
+
+class GPT(GPTModule):
+    color = GPT_COLOR
+    semaphore: asyncio.Semaphore = asyncio.Semaphore(GPT_BATCH_SIZE)
+    timeout = GPT_TIMEOUT

@@ -15,7 +15,6 @@ from src.modules.vars import EMPTY_PROMPT
 class VideoModule(AgentModule):
     max_photos_per_batch = 1
 
-    category_name = VIDEO_NAME
     category_message = VIDEO_MESSAGE
     category_response = VIDEO_RESPONSE
 
@@ -51,7 +50,7 @@ class VideoModule(AgentModule):
         return await cls.bot().download(message, path)
 
     @classmethod
-    async def _run(cls, name: str, logger, prompt: str, destination: Path, photo: Optional[Union[Path, List[Path]]] = None):
+    async def _run(cls, name: str, logger, prompt: str, destination: Path, photo: Path | list[Path] | None = None):
         model_and_name = f"{cls.syntx_name}_{name}"
         prompt = f"{model_and_name} {prompt}"
         message = await cls._generate(prompt=prompt, photo=photo, logger=logger)
@@ -60,7 +59,7 @@ class VideoModule(AgentModule):
 
 class VideoInBot(VideoModule):
     @classmethod
-    async def _generate(cls, prompt: str, logger, photo: Optional[Union[Path, List[Path]]] = None) -> Message:
+    async def _generate(cls, prompt: str, logger, photo: Path | list[Path] | None = None) -> Message:
         async with cls.syntx_lock:
             await cls.start()
             if photo:
@@ -78,27 +77,15 @@ class VideoInBot(VideoModule):
             logger=logger,
             request_message=generating_message
         )
-        logger.info(t("info.video.generation_end"))
+
         return message
 
 
 
 class VideoMiniApp(VideoModule):
     @classmethod
-    async def get_generate_button(cls, message: Message) -> str:
-        if message.reply_markup:
-            for row in message.reply_markup.inline_keyboard:
-                for button in row:
-                    if button.text:
-                        if button.text == VIDEO_URL_BUTTON:
-                            if button.web_app:
-                                if button.web_app.url:
-                                    return button.web_app.url
-        raise RuntimeError
-
-    @classmethod
     async def _generate_from_photo(cls, message: Message, logger, prompt: Optional[str] = None):
-        url = await cls.get_generate_button(message)
+        url = await cls.get_button_url(message, VIDEO_URL_BUTTON)
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=not config.DEBUG)
             page = await browser.new_page()
@@ -111,7 +98,7 @@ class VideoMiniApp(VideoModule):
             await submit_button.click()
 
     @classmethod
-    async def _generate(cls, logger, prompt: Optional[str] = None, photo: Optional[Union[Path, List[Path]]] = None) -> Message:
+    async def _generate(cls, logger, prompt: Optional[str] = None, photo: Path | list[Path] | None = None) -> Message:
         if not prompt:
             prompt = EMPTY_PROMPT
         async with cls.syntx_lock:

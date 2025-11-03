@@ -10,7 +10,7 @@ ru:
     name: "Сценарии"
     GenerateVideosFromPrompts: "Видео из промптов"
     GenerateVideosFromPhotos: "Видео из фото"
-    videos: "Генерировать видео"
+    ParaphrasePrompts: "Перефразировать промпты"
   scripts:
     name: "Скрипты"
     import_prompts: "Добавить промпты"

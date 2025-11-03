@@ -2,13 +2,16 @@ en:
   default:
     database:
       name: "Database"
-      description: "Database that module uses."
-    modules:
-      name: "Modules"
-      description: "Modules that module uses."
-    amount:
+      description: "Database that flow uses."
+    video_modules:
+      name: "Video modules"
+      description: "Video modules that flow uses. (Space - toggle, Enter - confirm)"
+    gen_amount:
       name: "Generations amount"
-      descriptions: "Amount of generations that module"
+      description: "Amount of generations for flow."
+    prompt:
+      name: "Prompt"
+      description: "Prompt that flow uses."
 
   GenerateVideosFromPrompts:
     name: "Videos from prompts"
@@ -17,3 +20,13 @@ en:
   GenerateVideosFromPhotos:
     name: "Videos from photos"
     choice: "Video from photos"
+
+  ParaphrasePrompts:
+    name: "Paraphrase prompts"
+    choice: "Paraphrase prompts"
+    pre_template:
+      name: "Template for GPT"
+      description: "Preprocessing prompt. It must contain {prompt} - where goes original prompt. It should contain instruction for GPT, that it must return JSON-code with only one parameter - prompt"
+    post_template:
+      name: "Final template"
+      description: "Postprocessing prompt. It must contain {prompt} - where goes paraphrased prompt."

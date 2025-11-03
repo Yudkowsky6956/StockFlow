@@ -1,5 +1,5 @@
 from .core_menu import Menu
-from src.flows import GenerateVideosFromPrompts, GenerateVideosFromPhotos
+from src.flows import GenerateVideosFromPrompts, GenerateVideosFromPhotos, ParaphrasePrompts
 from src.scripts import import_prompts, mark_files_as_done
 
 
@@ -13,13 +13,15 @@ class GlobalSettings(Menu):
 
 class FlowSettings(Menu):
     FLOWS_MESSAGE = "menu.flows_settings.name"
-    FLOWS_VIDEOS_FROM_PROMPTS = "menu.flows.GenerateVideosFromPrompts"
-    FLOWS_VIDEOS_FROM_PHOTOS = "menu.flows.GenerateVideosFromPhotos"
+    FLOWS_VIDEOS_FROM_PROMPTS = "config.GenerateVideosFromPrompts.choice"
+    FLOWS_VIDEOS_FROM_PHOTOS = "config.GenerateVideosFromPhotos.choice"
+    FLOWS_PARAPHRASE_PROMPTS = "config.ParaphrasePrompts.choice"
 
     name = FLOWS_MESSAGE
     choices_map = Menu.DEFAULT_CHOICES | {
         FLOWS_VIDEOS_FROM_PROMPTS: GenerateVideosFromPrompts.run_menu,
-        FLOWS_VIDEOS_FROM_PHOTOS: GenerateVideosFromPhotos.run_menu
+        FLOWS_VIDEOS_FROM_PHOTOS: GenerateVideosFromPhotos.run_menu,
+        FLOWS_PARAPHRASE_PROMPTS: ParaphrasePrompts.run_menu
     }
 
 
@@ -37,13 +39,15 @@ class SettingsMenu(Menu):
 
 class FlowsMenu(Menu):
     FLOWS_MESSAGE = "menu.flows.name"
-    FLOWS_VIDEOS_FROM_PROMPTS = "menu.flows.GenerateVideosFromPrompts"
-    FLOWS_VIDEOS_FROM_PHOTOS = "menu.flows.GenerateVideosFromPhotos"
+    FLOWS_VIDEOS_FROM_PROMPTS = "config.GenerateVideosFromPrompts.choice"
+    FLOWS_VIDEOS_FROM_PHOTOS = "config.GenerateVideosFromPhotos.choice"
+    FLOWS_PARAPHRASE_PROMPTS = "config.ParaphrasePrompts.choice"
 
     name = FLOWS_MESSAGE
     choices_map = Menu.DEFAULT_CHOICES | {
         FLOWS_VIDEOS_FROM_PROMPTS: GenerateVideosFromPrompts.run,
-        FLOWS_VIDEOS_FROM_PHOTOS: GenerateVideosFromPhotos.run
+        FLOWS_VIDEOS_FROM_PHOTOS: GenerateVideosFromPhotos.run,
+        FLOWS_PARAPHRASE_PROMPTS: ParaphrasePrompts.run
     }
 
 

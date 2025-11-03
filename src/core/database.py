@@ -1,207 +1,258 @@
-import threading
-from typing import List, Optional
+import sqlite3
 from collections import namedtuple
 
-from i18n import t
 from loguru import logger
-from sqlalchemy import (
-    create_engine,
-    Column,
-    Integer,
-    String,
-    Boolean,
-    select,
-    func
-)
-from sqlalchemy.orm import declarative_base, Session
+from i18n import t
 
-from src.utils.hash import get_short_hash
 from .vars import DATABASE_FOLDER
+from ..utils.hash import get_short_hash
 
-
-DATABASE_FOLDER.mkdir(parents=True, exist_ok=True)
-Base = declarative_base()
-
-
-class PromptEntry(Base):
-    __tablename__ = "prompts"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    prompt = Column(String, nullable=True)
-    alt_prompt = Column(String, nullable=True)
-    hash = Column(String, nullable=True)
-    error = Column(Boolean, default=False)
-    VEO = Column(Boolean, default=False)
-    RUNWAY = Column(Boolean, default=False)
-    SORA = Column(Boolean, default=False)
-    MIDJOURNEY = Column(Boolean, default=False)
 
 PromptRecord = namedtuple("PromptRecord", ["prompt", "alt_prompt", "hash"])
 
 
 class Database:
+    REQUIRED_COLUMNS = [
+        {"name": "prompt", "type": "TEXT"},
+        {"name": "alt_prompt", "type": "TEXT"},
+        {"name": "hash", "type": "TEXT"},
+        {"name": "error", "type": "INTEGER"},
+        {"name": "VEO", "type": "INTEGER"},
+        {"name": "RUNWAY", "type": "INTEGER"},
+        {"name": "SORA", "type": "INTEGER"},
+        {"name": "MIDJOURNEY", "type": "INTEGER"}
+    ]
+
     def __init__(self, name: str):
         self.name = name
-        self._lock = threading.RLock()
-        self.logger = logger.bind(module_name=self.name, module_color="#111111")
+        self.path = DATABASE_FOLDER / f"{name}.db"
+        self.logger = logger.bind(module=self.name)
+        self.logger.debug("DB Initialized.")
 
-        db_path = DATABASE_FOLDER / f"{self.name}.db"
-        self.engine = create_engine(f"sqlite:///{db_path}", echo=False, future=True)
+    def __enter__(self):
+        """Запускает соединение с БД"""
+        self.connection = sqlite3.connect(self.path)
+        self.cursor = self.connection.cursor()
+        self._ensure_all_exists()
+        return self
 
-        Base.metadata.create_all(self.engine)
-        self.logger.debug(f"DB initialized at {db_path}")
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Останавливает соединение с ДБ"""
+        self.connection.close()
 
-        # Лог количества строк
-        with Session(self.engine):
-            self.logger.debug(f"Current rows in DB: {self.count_rows()}")
+    def commit(self):
+        self.connection.commit()
 
-    # ---------------------------
-    # Работа с данными
-    # ---------------------------
-    def get(self, amount: Optional[int] = None, modules: Optional[List[str]] = None) -> List[PromptRecord]:
-        with Session(self.engine) as session:
-            # Базовый фильтр: без ошибок
-            conditions = [(PromptEntry.error == False) | (PromptEntry.error.is_(None))]
+    @property
+    def existing_columns(self):
+        self.cursor.execute(f"PRAGMA table_info({self.name})")
+        existing_columns = [row[1] for row in self.cursor.fetchall()]
+        return existing_columns
 
-            # Если заданы модули, добавляем фильтр "хотя бы один из них не завершён"
-            if modules:
-                module_conditions = [
-                    (getattr(PromptEntry, m) == False) | (getattr(PromptEntry, m).is_(None))
-                    for m in modules
-                ]
-                # хотя бы один из флагов False или NULL
-                from sqlalchemy import or_
-                conditions.append(or_(*module_conditions))
+    def get(self, amount: int = None, modules: list[str] = None) -> list[PromptRecord]:
+        """
+        Возвращает список PromptRecord:
+        - Не завершённые (по указанным модулям)
+        - Без ошибки
+        - Можно ограничить количеством amount
+        """
+        self.cursor.execute(f'SELECT prompt, alt_prompt, hash FROM "{self.name}"')
+        rows = self.cursor.fetchall()
 
-            # Собираем основной запрос
-            query = select(PromptEntry).where(*conditions)
+        result = []
+        for prompt, alt_prompt, _hash in rows:
+            if alt_prompt is None:
+                continue  # alt_prompt обязателен
 
-            if amount is not None:
-                query = query.limit(amount)
+            # Пропускаем строки с ошибкой
+            if _hash and self.is_error(_hash):
+                continue
 
-            rows = session.execute(query).scalars().all()
+            # Пропускаем строки, которые завершены во всех указанных модулях
+            if modules and _hash:
+                if all(self.is_marked(_hash, m) for m in modules):
+                    continue
 
-            rows = [
-                PromptRecord(r.prompt, r.alt_prompt, r.hash)
-                for r in rows
-                if r.alt_prompt is not None
-            ]
-            logger.info(t("info.database.imported_prompts"), amount=len(rows))
-            return rows
+            result.append(PromptRecord(prompt, alt_prompt, _hash))
+            if amount and len(result) >= amount:
+                break
 
-    def count_rows(self, include_error: bool = True) -> int:
-        with Session(self.engine) as session:
-            query = select(func.count(PromptEntry.id))
-            if not include_error:
-                query = query.where((PromptEntry.error == False) | (PromptEntry.error.is_(None)))
-            return session.scalar(query)
+        self.logger.info(t("info.database.imported_prompts"), amount=len(result))
+        return result
 
-    # ---------------------------
-    # Импорт данных
-    # ---------------------------
-    def import_prompts(self, prompts: List[str]):
-        with Session(self.engine) as session:
-            for p in prompts:
-                session.add(PromptEntry(prompt=p))
-            session.commit()
-            self.logger.debug(f"Imported {len(prompts)} prompts")
+    def get_not_paraphrased(self, amount: int = None) -> list[PromptRecord]:
+        self.cursor.execute(f'''
+            SELECT prompt, alt_prompt, hash FROM "{self.name}"
+            WHERE prompt IS NOT NULL AND alt_prompt IS NULL
+        ''')
+        rows = self.cursor.fetchall()
 
-    def import_alt_prompts(self, prompts: List[str]):
-        with Session(self.engine) as session:
-            for p in prompts:
-                session.add(PromptEntry(alt_prompt=p))
-            session.commit()
-            self.logger.debug(f"Imported {len(prompts)} alt_prompts")
-            self._ensure_hash(session)
+        result = []
+        for prompt, alt_prompt, _hash in rows:
+            result.append(PromptRecord(prompt, alt_prompt, _hash))
+            if amount and len(result) >= amount:
+                break
 
-    # ---------------------------
-    # Хэши
-    # ---------------------------
-    def _ensure_hash(self, session: Optional[Session] = None):
-        own_session = False
-        if session is None:
-            session = Session(self.engine)
-            own_session = True
+        self.logger.info(t("info.database.imported_prompts"), amount=len(result))
+        return result
 
-        rows = session.execute(
-            select(PromptEntry).where((PromptEntry.hash.is_(None)) & (PromptEntry.alt_prompt.is_not(None)))
-        ).scalars().all()
+    def _ensure_column_exists(self, column: dict):
+        """Проверяет, что колонка существует"""
+        if column["name"] not in self.existing_columns:
+            self.logger.debug(f'Column with name "{column["name"]}" not exists, creating it...')
+            self.cursor.execute(f'ALTER TABLE "{self.name}" ADD COLUMN {column["name"]} {column["type"]}')
+            self.commit()
 
-        total = len(rows)
-        if total == 0:
-            if own_session:
-                session.close()
-            return
+    def _ensure_table_exists(self):
+        columns_sql = ", ".join(f"{col["name"]} {col["type"]}" for col in self.REQUIRED_COLUMNS)
+        self.cursor.execute(
+            f"""CREATE TABLE IF NOT EXISTS \"{self.name}\" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, {columns_sql}
+            )"""
+        )
 
-        self.logger.info(f"Generating hashes for {total} entries")
-        for i, row in enumerate(rows, start=1):
-            row.hash = get_short_hash(row.alt_prompt)
-            self.logger.info(f"{i}/{total} hashed")
+    def _ensure_all_exists(self):
+        """Проверяет наличие таблицы и нужных колонок, создаёт при необходимости."""
+        self._ensure_table_exists()
+        for col in self.REQUIRED_COLUMNS:
+            self._ensure_column_exists(col)
+        self.commit()
 
-        session.commit()
-        if own_session:
-            session.close()
-
-    # ---------------------------
-    # Флаги
-    # ---------------------------
-    def mark_error(self, value: str, _type: str = "hash"):
-        with Session(self.engine) as session:
-            row = session.execute(
-                select(PromptEntry).where(
-                    (PromptEntry.prompt == value)
-                    | (PromptEntry.alt_prompt == value)
-                    | (PromptEntry.hash == value)
-                )
-            ).scalars().first()
-
-            if row:
-                row.error = True
-            else:
-                kwargs = {_type: value, "error": True}
-                session.add(PromptEntry(**kwargs))
-            session.commit()
-
-    def mark_done(self, value: str, module: str, _type: str = "hash"):
-        with Session(self.engine) as session:
-            row = session.execute(
-                select(PromptEntry).where(
-                    (PromptEntry.prompt == value)
-                    | (PromptEntry.alt_prompt == value)
-                    | (PromptEntry.hash == value)
-                )
-            ).scalars().first()
-
-            if row:
-                setattr(row, module, True)
-            else:
-                kwargs = {_type: value, module: True}
-                session.add(PromptEntry(**kwargs))
-            session.commit()
 
     def is_done(self, value: str, module: str) -> bool:
+        """Проверяет сделан ли value в module.
+        (Возвращает True, если в error стоит 1 или в module стоит 1)
         """
-        Проверяет, помечена ли запись как завершённая (module=True) или как ошибка (error=True)
-        по prompt / alt_prompt / hash.
+        return self.is_error(value) or self.is_marked(value, module)
+
+    def is_error(self, value: str) -> bool:
+        """Проверяет помечен ли value как ошибочный"""
+        return self.is_marked(value, "error")
+
+    def is_marked(self, value: str, module: str) -> bool:
+        """Общий модуль для проверки 1 в колонке module по value"""
+        self.cursor.execute(
+            f"""SELECT 1 FROM \"{self.name}\"
+            WHERE (prompt = ? OR alt_prompt = ? OR hash = ?)
+                AND \"{module}\" = 1
+            LIMIT 1""",
+            (value, value, value)
+        )
+        return self.cursor.fetchone() is not None
+
+
+    def mark_error(self, value: str):
+        """Маркирует данный value ошибочным"""
+        self.mark_done(value, "error")
+
+    def mark_done(self, value: str, module: str) -> bool:
+        """Общий метод для маркировки"""
+        self.cursor.execute(
+            f"""UPDATE \"{self.name}\"
+            SET \"{module}\" = 1
+            WHERE prompt = ? OR alt_prompt = ? OR hash = ?
+            """,
+            (value, value, value)
+        )
+        self.commit()
+        return bool(self.cursor.rowcount)
+
+    def set_paraphrased(self, value: str, paraphrased: str) -> bool:
         """
-        with Session(self.engine) as session:
-            row = session.execute(
-                select(PromptEntry).where(
-                    (PromptEntry.prompt == value)
-                    | (PromptEntry.alt_prompt == value)
-                    | (PromptEntry.hash == value)
+        Находит строку, где hash=value или prompt=value,
+        и устанавливает alt_prompt=paraphrased.
+        Возвращает True, если строка была обновлена.
+        """
+        self.cursor.execute(
+            f"""
+            UPDATE "{self.name}"
+            SET alt_prompt = ?
+            WHERE hash = ? OR prompt = ?
+            """,
+            (paraphrased, value, value)
+        )
+        self.commit()
+        return bool(self.cursor.rowcount)
+
+    def create_row(
+            self,
+            prompt: str = None,
+            alt_prompt: str = None,
+            _hash: str = None,
+            error: bool = None,
+            veo: bool = None,
+            runway: bool = None,
+            sora: bool = None,
+            midjourney: bool = None
+        ):
+        if not (prompt or alt_prompt or _hash):
+            raise ValueError("Required at least one of these parameters: prompt, alt_prompt, _hash")
+        self.cursor.execute(f"""
+        INSERT INTO \"{self.name}\" 
+        (prompt, alt_prompt, hash, error, VEO, RUNWAY, SORA, MIDJOURNEY)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            prompt,
+            alt_prompt,
+            _hash,
+            int(error) if error is not None else None,
+            int(veo) if veo is not None else None,
+            int(runway) if runway is not None else None,
+            int(sora) if sora is not None else None,
+            int(midjourney) if midjourney is not None else None,
+        ))
+        self.commit()
+
+    def _ensure_hash(self):
+        self.cursor.execute(f"""
+            SELECT id, alt_hash FROM "{self.name}"
+            WHERE hash IS NULL AND alt_hash IS NOT NULL
+        """)
+        rows = self.cursor.fetchall()
+        total = len(rows)
+
+        # Локализованные логи
+        self.logger.info(t("info.database.ensure_hash.rows_found"), amount=total)
+        self.logger.info(t("info.database.ensure_hash.start"))
+
+        if total == 0:
+            self.logger.info(t("info.database.ensure_hash.done"))
+            return
+
+        next_percent_log = 10  # следующий порог для логирования в процентах
+
+        for index, (row_id, alt_hash) in enumerate(rows, start=1):
+            short_hash = get_short_hash(alt_hash)
+            self.cursor.execute(
+                f'UPDATE "{self.name}" SET hash = ? WHERE id = ?',
+                (short_hash, row_id)
+            )
+
+            percent_done = (index / total) * 100
+            if percent_done >= next_percent_log:
+                self.logger.info(
+                    t("info.database.ensure_hash.progress"),
+                    percent=int(percent_done),
+                    processed=index,
+                    total=total,
+                    last_id=row_id
                 )
-            ).scalars().first()
+                next_percent_log += 10  # следующий порог
 
-            if not row:
-                return False
+        self.commit()
+        self.logger.info(t("info.database.ensure_hash.done"))
 
-            # Если есть ошибка — сразу True
-            if row.error:
-                return True
+    def import_prompts(self, prompts: list[str]):
+        """Импортирует список prompt в таблицу"""
+        for p in prompts:
+            self.create_row(prompt=p)
+        self.commit()
+        self.logger.debug(f"Imported {len(prompts)} prompts")
 
-            # Проверяем флаг модуля (например, VEO, RUNWAY и т.д.)
-            if hasattr(row, module) and getattr(row, module):
-                return True
-
-            return False
+    def import_alt_prompts(self, prompts: list[str]):
+        """Импортирует список alt_prompt в таблицу и заполняет hash, если нужно"""
+        for p in prompts:
+            self.create_row(alt_prompt=p)
+        self.commit()
+        self.logger.debug(f"Imported {len(prompts)} alt_prompts")
+        self._ensure_hash()

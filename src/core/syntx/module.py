@@ -2,6 +2,7 @@ import asyncio
 
 from i18n import t
 from loguru import logger as default_logger
+from pyrogram.errors import FloodWait
 from pyrogram.types import Message
 
 from src.core.pyrogram.filters import contains
@@ -46,9 +47,9 @@ class SyntxModule(Module):
         pass
 
     @classmethod
-    async def _handle_generation_error(cls, e: GenerationError, name: str, database: Database,  logger, *args, **kwargs):
+    async def _handle_generation_error(cls, e: GenerationError, name: str, database: Database,  logger, mark=True, *args, **kwargs):
         if e.log:
-            logger.error(t(e.log, delay=e.delay))
+            logger.error(t(e.log), delay=e.delay)
 
         if e.mark:
             database.mark_error(name)
@@ -61,39 +62,61 @@ class SyntxModule(Module):
             await asyncio.sleep(e.delay)
             if e.lock:
                 cls.event_lock.turn_off()
-            return await cls.run(name, logger, database, *args, **kwargs)
+            return await cls.run(name, logger, database, mark, *args, **kwargs)
 
         if e.fatal:
             raise
 
     @classmethod
-    async def run_back(cls, name: str, database: Database, logger, *args, **kwargs):
-        if database.is_done(name, cls.syntx_name):
+    async def run_back(cls, name: str, database: Database, logger, mark=True, *args, **kwargs):
+        if mark and database.is_done(name, cls.syntx_name):
             raise GenerationError(f"Skips generation of {name}")
 
         logger = logger.bind(module_name=cls.syntx_name, module_color=cls.color)
-        result = await cls._run(name, logger, *args, **kwargs)
-        database.mark_done(name, cls.syntx_name)
+        result = await cls._run(name=name, logger=logger, database=database, *args, **kwargs)
+        if mark:
+            database.mark_done(name, cls.syntx_name)
         return result
 
     @classmethod
-    async def run(cls, name: str, logger, database: Database, *args, **kwargs):
+    async def run(cls, name: str, logger, database: Database, mark=True, *args, **kwargs):
         try:
             try:
                 async with cls.semaphore:
                     await cls.event_lock.wait()
                     result = await asyncio.wait_for(
-                        cls._run(name, logger.bind(module_name=cls.syntx_name, module_color=cls.color), *args,
-                                 **kwargs),
+                        cls.run_back(
+                            name,
+                            database,
+                            logger.bind(module_name=cls.syntx_name, module_color=cls.color),
+                            mark,
+                            *args,
+                            **kwargs
+                        ),
                         timeout=cls.timeout
                     )
-                    database.mark_done(name, cls.syntx_name)
                     return result
             except asyncio.TimeoutError:
                 raise GenerationError("error.timeout_error", log="error.timeout_error", mark=True)
+            except FloodWait as e:
+                raise GenerationError("error.flood_wait", log="flood_wait", delay=e.value, lock=True)
         except GenerationError as e:
-            return await cls._handle_generation_error(e, name, database, logger, *args, **kwargs)
+            return await cls._handle_generation_error(e, name, database, logger, mark, *args, **kwargs)
+        finally:
+            if cls.syntx_lock.locked():
+                cls.syntx_lock.release()
 
+    @classmethod
+    async def get_button_url(cls, message: Message, button_text: str) -> str:
+        if message.reply_markup:
+            for row in message.reply_markup.inline_keyboard:
+                for button in row:
+                    if button.text:
+                        if button.text == button_text:
+                            if button.web_app:
+                                if button.web_app.url:
+                                    return button.web_app.url
+        raise RuntimeError
 
 class CategoryModule(SyntxModule):
     category_message = "MESSAGE"

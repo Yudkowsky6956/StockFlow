@@ -8,6 +8,9 @@ en:
     exit: "⛔  Exit"
   flows:
     name: "Flows"
+    GenerateVideosFromPrompts: "Prompts to video"
+    GenerateVideosFromPhotos: "Photos to video"
+    ParaphrasePrompts: "Paraphrase prompts"
   scripts:
     name: "Scripts"
     import_prompts: "Import prompts"

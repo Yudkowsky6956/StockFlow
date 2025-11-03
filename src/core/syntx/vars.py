@@ -13,6 +13,7 @@ VIDEO_URL_BUTTON = "🎞️ Настроить и запустить"
 GPT_NAME = "GPT"
 GPT_MESSAGE = "/gpt"
 GPT_RESPONSE = "💡 GPTs/Claude/Gemini\n\n🎙️ Голосом, ✍️ текстом, 🌅 изображением — задавайте любые вопросы удобным способом и SYNTX тут же найдёт решение + 🌐 выход в интернет (только 4 версия модели)."
+GPT_VIEW_FULL_DIALOG = "💬 Просмотреть весь диалог"
 
 DESIGN_NAME = "DESIGN"
 DESIGN_MESSAGE = "/design"

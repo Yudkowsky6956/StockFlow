@@ -8,6 +8,7 @@ en:
   gpt:
     generating: 'Generating text…'
     generation_end: 'Generation completed! ✔️'
+    invalid_conversation_url: "Invalid conversation URL."
   interface:
     ask:
       integer: "Enter integer"
@@ -18,6 +19,7 @@ en:
       database: "Select database"
       ask_new_database: "Enter database name (without .db)"
       new_database: "➕  New database"
+      video_modules: "Select video modules"
     select:
       folder: "Select folder"
       file: "Select file"
@@ -43,4 +45,9 @@ en:
       files_found: "Found {amount} files that match format \"MODULE_HASH.jpg\" or \"MODULE_HASH.mp4\" (for example \"VEO_6cbdab32.jpg\")."
       marked_done: "{amount} lines marked as done in database \"{database}\"."
   database:
+    ensure_hash:
+      rows_found: "Found {amount} rows for hash creating."
+      start: "Starting hash creation..."
+      progress: "Done {percent}% ({processed}/{total}): hash filled up to id={last_id}"
+      done: "Hash creation finished."
     imported_prompts: "Imported {amount} prompts."

@@ -1,3 +1,4 @@
 from .videos_from_prompts import GenerateVideosFromPrompts
 from .videos_from_photos import GenerateVideosFromPhotos
+from .paraphrase_prompts import ParaphrasePrompts
 from .core_flow import Flow
