@@ -34,3 +34,11 @@ def swap_word_with_previous(text: str, target_word: str = "lifestyle") -> str | 
             words[i-1], words[i] = words[i], words[i-1]
             break
     return " ".join(words)
+
+
+def compile_prompt(name: str, prompt: str = None) -> str:
+    if prompt:
+        prompt = f"{name} {prompt}"
+    else:
+        prompt = f"{name}"
+    return prompt.strip()
