@@ -4,8 +4,9 @@ import asyncio
 from loguru import logger as default_logger
 from pyrogram.filters import AndFilter
 from pyrogram.types import Message
+from i18n import t
 
-from .module import SyntxModule
+from src.modules.core_module import SyntxModule
 from src.core.pyrogram.session import Session
 from src.core.pyrogram.bot import TelegramBot
 from src.core.pyrogram.filters import contains, is_replying_to, message_exists
@@ -23,13 +24,16 @@ class SyntxBot(TelegramBot):
         super().__init__(session, phone_number)
         SyntxModule.set_bot(self)
 
-    async def wait_for(self, flt: AndFilter, message: Optional[Message] = None, send: bool = True, edit: bool = True, reply: bool = False, logger=default_logger, future=None, request_message=None) -> Message:
+    async def wait_for(self, flt: AndFilter, message: Optional[Message] = None, send: bool = True, edit: bool = True, reply: bool = False, logger=default_logger, future=None, request_message=None, photo=None, button_map=None, wait=True) -> Message:
         local_handlers = []
         if not future:
             future = asyncio.get_event_loop().create_future()
         await self.add_error_handlers(message, future, local_handlers, logger, request_message)
-        future = await super().wait_for_future(flt, message, send, edit, reply, logger, future, local_handlers)
-        return await future
+        if wait:
+            future = await super().wait_for_future(flt, message, send, edit, reply, logger, future, local_handlers, photo, button_map)
+            return await future
+        else:
+            return future
 
     async def add_error_handlers(self, original_message: Message, future, local_handlers: List, logger=default_logger, request_message=None):
         def _make_handler(error: HandlerError):
@@ -39,7 +43,7 @@ class SyntxBot(TelegramBot):
                 if not future.done():
                     if error.log:
                         if error.fatal:
-                            logger.critical(error.log)
+                            logger.critical(t(error.log))
                     future.set_exception(GenerationError(message.text, log=error.log, delay=error.delay, fatal=error.fatal, mark=error.mark, lock=error.lock))
             return handler
 

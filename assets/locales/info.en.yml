@@ -1,5 +1,8 @@
 #file: noinspection SpellCheckingInspection
 en:
+  design:
+    generating: "Generating photo…"
+    generation_end: "Generation completed! ✔️"
   video:
     loading_photos: "Loading {amount} photos…"
     generating: 'Generating video…'
@@ -20,12 +23,18 @@ en:
       ask_new_database: "Enter database name (without .db)"
       new_database: "➕  New database"
       video_modules: "Select video modules"
+      photo_modules: "Select photo modules"
+      yes_no_message: "Select yes or no"
+      yes_answer: "Yes"
+      no_answer: "No"
     select:
       folder: "Select folder"
       file: "Select file"
       files: "Select files"
       txt: "Select text file"
       txt_filetype: "Text"
+      csv: "Select .csv file"
+      csv_filetype: "CSV"
       photos: "Select photos"
       photos_filetype: "Photo"
       videos: "Select videos"
@@ -44,10 +53,19 @@ en:
     mark_files_as_done:
       files_found: "Found {amount} files that match format \"MODULE_HASH.jpg\" or \"MODULE_HASH.mp4\" (for example \"VEO_6cbdab32.jpg\")."
       marked_done: "{amount} lines marked as done in database \"{database}\"."
+    clear_metadata:
+      message: "Select photo to clear metadata"
+      photos_selected: "{amount} photos were selected for cleaning metadata"
+      final: "{amount} photo were successfully cleared."
   database:
     ensure_hash:
       rows_found: "Found {amount} rows for hash creating."
-      start: "Starting hash creation..."
+      start: "Starting hash creation…"
       progress: "Done {percent}% ({processed}/{total}): hash filled up to id={last_id}"
       done: "Hash creation finished."
     imported_prompts: "Imported {amount} prompts."
+  flows:
+    generate_metadata:
+      progress: "Generating metadata"
+      unit: "photo"
+

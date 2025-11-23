@@ -1,31 +1,48 @@
 import asyncio
 
+import yaml
 from i18n import t
 from loguru import logger as default_logger
 from pyrogram.errors import FloodWait
 from pyrogram.types import Message
 
-from src.core.pyrogram.filters import contains
 from src.core.database import Database
-from .exceptions import GenerationError
-from .current_module import SyntxCurrentModule
-from .vars import *
-from .event_lock import EventLock
+from src.core.pyrogram.filters import contains
+from src.core.settings_mixin import SettingsMixin
+from src.core.syntx.current_module import SyntxCurrentModule
+from src.core.syntx.event_lock import EventLock
+from src.core.syntx.exceptions import GenerationError
+from src.modules.vars import *
 
 
-class Module:
-    pass
+class CoreModule(SettingsMixin):
+    CONFIG_PARAMETERS = ["name", "color", "timeout", "batch_size"]
+    menu_config_name = "modules"
+    semaphore = None
+    CONFIG_PATH = MODULES_YML
+    LOCALE_NAME = "config_module"
+
+    @classmethod
+    async def _generate(cls, *args, **kwargs) -> Message:
+        pass
+
+    @classmethod
+    async def _run(cls, *args, **kwargs):
+        pass
+
+    @classmethod
+    def get_semaphore(cls):
+        config = cls.get_config()
+        if not cls.semaphore:
+            cls.semaphore = asyncio.Semaphore(config.get("batch_size", 1))
+        return cls.semaphore
 
 
-class SyntxModule(Module):
-    syntx_name = "NAME"
-    color = "#FFFFFF"
-    semaphore: asyncio.Semaphore = asyncio.Semaphore(1)
+class SyntxModule(CoreModule):
     event_lock: EventLock = EventLock()
     syntx_lock = asyncio.Lock()
     menu_message = MENU_MESSAGE
     menu_response = MENU_RESPONSE
-    timeout = 60 * 10
     _bot = None
 
     @classmethod
@@ -39,21 +56,12 @@ class SyntxModule(Module):
         return cls._bot
 
     @classmethod
-    async def _generate(cls, *args, **kwargs) -> Message:
-        pass
-
-    @classmethod
-    async def _run(cls, *args, **kwargs):
-        pass
-
-    @classmethod
     async def _handle_generation_error(cls, e: GenerationError, name: str, database: Database,  logger, mark=True, *args, **kwargs):
-        if e.log:
+        if e.log and not e.fatal:
             logger.error(t(e.log), delay=e.delay)
 
         if e.mark:
             database.mark_error(name)
-            pass
 
         if e.lock and e.delay:
             cls.event_lock.turn_on()
@@ -69,42 +77,46 @@ class SyntxModule(Module):
 
     @classmethod
     async def run_back(cls, name: str, database: Database, logger, mark=True, *args, **kwargs):
-        if mark and database.is_done(name, cls.syntx_name):
+        config = cls.get_config()
+        if mark and database.is_done(name, config["name"]):
             raise GenerationError(f"Skips generation of {name}")
 
-        logger = logger.bind(module_name=cls.syntx_name, module_color=cls.color)
+        logger = logger.bind(module_name=config["name"], module_color=config["color"])
         result = await cls._run(name=name, logger=logger, database=database, *args, **kwargs)
         if mark:
-            database.mark_done(name, cls.syntx_name)
+            database.mark_done(name, config["name"])
         return result
 
     @classmethod
     async def run(cls, name: str, logger, database: Database, mark=True, *args, **kwargs):
+        config = cls.get_config()
         try:
             try:
-                async with cls.semaphore:
+                async with cls.get_semaphore():
                     await cls.event_lock.wait()
                     result = await asyncio.wait_for(
                         cls.run_back(
                             name,
                             database,
-                            logger.bind(module_name=cls.syntx_name, module_color=cls.color),
+                            logger.bind(module_name=config["name"], module_color=config["color"]),
                             mark,
                             *args,
                             **kwargs
                         ),
-                        timeout=cls.timeout
+                        timeout=config["timeout"]
                     )
                     return result
             except asyncio.TimeoutError:
-                raise GenerationError("error.timeout_error", log="error.timeout_error", mark=True)
+                log_message = t("error.timeout_error")
+                raise GenerationError(log_message, log=log_message, delay=5)
             except FloodWait as e:
-                raise GenerationError("error.flood_wait", log="flood_wait", delay=e.value, lock=True)
+                log_message = t("error.flood_wait").format(delay=e.value)
+                raise GenerationError(log_message, log=log_message, delay=e.value, lock=True)
         except GenerationError as e:
             return await cls._handle_generation_error(e, name, database, logger, mark, *args, **kwargs)
-        finally:
-            if cls.syntx_lock.locked():
-                cls.syntx_lock.release()
+        # finally:
+        #     if cls.syntx_lock.locked():
+        #         cls.syntx_lock.release()
 
     @classmethod
     async def get_button_url(cls, message: Message, button_text: str) -> str:
@@ -125,14 +137,16 @@ class CategoryModule(SyntxModule):
     @classmethod
     async def start(cls):
         """Prepare SyntxAI for Module using async Lock"""
-        if await SyntxCurrentModule.get() != cls.syntx_name:
-            default_logger.debug(f"Switching SyntxAI Module to {cls.syntx_name}")
+        config = cls.get_config()
+        if await SyntxCurrentModule.get() != config["name"]:
+            default_logger.debug(f"Switching SyntxAI Module to {config["name"]}")
             await cls._start()
 
     @classmethod
     async def _start(cls):
         """Prepare SyntxAI for Module"""
-        await SyntxCurrentModule.set(cls.syntx_name)
+        config = cls.get_config()
+        await SyntxCurrentModule.set(config["name"])
         user_main_menu_message = await cls.bot().send(cls.menu_message)
         main_menu_message = await cls.bot().wait_for(message=user_main_menu_message, flt=contains(cls.menu_response))
         await cls.bot().delete(main_menu_message)
@@ -154,7 +168,6 @@ class AgentModule(CategoryModule):
         await cls.bot().delete(module_message)
 
 class GPTModule(CategoryModule):
-    syntx_name = GPT_NAME
     category_message = GPT_MESSAGE
     category_response = GPT_RESPONSE
 

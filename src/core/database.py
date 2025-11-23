@@ -99,7 +99,7 @@ class Database:
     def _ensure_column_exists(self, column: dict):
         """Проверяет, что колонка существует"""
         if column["name"] not in self.existing_columns:
-            self.logger.debug(f'Column with name "{column["name"]}" not exists, creating it...')
+            self.logger.debug(f'Column with name "{column["name"]}" not exists, creating it…')
             self.cursor.execute(f'ALTER TABLE "{self.name}" ADD COLUMN {column["name"]} {column["type"]}')
             self.commit()
 

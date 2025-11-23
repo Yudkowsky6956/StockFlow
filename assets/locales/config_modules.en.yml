@@ -1,0 +1,56 @@
+en:
+  default:
+    name:
+      name: "Module Name"
+      message: "Enter the module name"
+      description: "Determines how the model will be stored in the database. Changing it is not recommended."
+    color:
+      name: "Module Color"
+      message: "Enter the module color"
+      description: "Specifies the module color in the console. Should be in HEX format (e.g., #FFFFFF - white)."
+    timeout:
+      name: "Timeout"
+      message: "Enter the number of seconds until timeout"
+      description: "The time after which the module will raise an error if the result is not ready, in seconds."
+    batch_size:
+      name: "Concurrent Generations"
+      message: "Enter the number of concurrent generations"
+      description: "Specifies how many requests the module can generate simultaneously."
+    flags:
+      name: "Flags"
+      message: "Enter flags for the module"
+      description: "Adds these flags before the prompt to more precisely control generation (for example, --ar 16:9 in Midjourney sets the aspect ratio). Separate flags with spaces."
+
+  Veo:
+    name: "Veo"
+    choice: "⭕  Veo"
+
+  Runway:
+    name: "RunWay"
+    choice: "🎞️ RunWay: Gen-4"
+
+  Sora:
+    name: "Sora"
+    choice: "🌙 Sora"
+
+  MiniMax:
+    name: "MiniMax"
+    choice: "🎦 Hailuo MiniMax"
+
+  Luma:
+    name: "Luma"
+    choice: "📽️ Luma: DM"
+
+  GPT:
+    name: "GPT"
+    choice: "💡 GPT"
+
+  Midjourney:
+    name: "MidJourney"
+    choice: "🌄 MidJourney"
+
+  Nano:
+    name: "Nano"
+    choice: "🍌 Nano"
+
+

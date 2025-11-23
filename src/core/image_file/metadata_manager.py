@@ -9,21 +9,27 @@ from .vars import *
 class ImageMetadataManager:
     @classmethod
     def get_title(cls, path: Optional[Path]=None, metadata: Optional[tuple]=None):
-        return cls._get_attribute(iptc_title_tag, path, metadata) or ""
+        title = cls._get_attribute(exif_title_tag, path, metadata) or ""
+        return title.replace("\x00", "")
 
     @classmethod
     def get_description(cls, path: Optional[Path]=None, metadata: Optional[tuple]=None):
-        return cls._get_attribute(iptc_description_tag, path, metadata) or ""
+        description = cls._get_attribute(exif_description_tag, path, metadata) or ""
+        return description.replace("\x00", "")
 
     @classmethod
     def get_keywords(cls, path: Optional[Path]=None, metadata: Optional[tuple]=None):
-        return cls._get_attribute(iptc_keywords_tag, path, metadata) or []
+        keywords = cls._get_attribute(exif_keywords_tag, path, metadata) or ""
+        keywords = keywords.replace("\x00", "")
+        if not keywords:
+            return []
+        else:
+            return keywords.split("; ")
 
     @staticmethod
     def set_title(path: Path, title: str):
         with pyexiv2.Image(str(path)) as image:
             image.clear_thumbnail()
-            image.modify_iptc({iptc_title_tag: title, iptc_object_tag: title})
             image.modify_exif({exif_title_tag: title + '\x00'})
             image.modify_xmp({xmp_title_tag: title})
             image.modify_xmp({xmp_title_tag: {xmp_legacy_tag: title}})
@@ -32,15 +38,15 @@ class ImageMetadataManager:
     def set_description(path: Path, description: str):
         with pyexiv2.Image(str(path)) as image:
             image.clear_thumbnail()
-            image.modify_iptc({iptc_description_tag: description})
             image.modify_exif({exif_description_tag: description + '\x00'})
             image.modify_xmp({xmp_description_tag: description})
 
     @staticmethod
     def set_keywords(path: Path, keywords: list):
+        if keywords == [""]:
+            keywords = []
         with pyexiv2.Image(str(path)) as image:
             image.clear_thumbnail()
-            image.modify_iptc({iptc_keywords_tag: keywords})
             image.modify_exif({exif_keywords_tag: '; '.join(keywords) + '\x00'})
             image.modify_xmp({xmp_keywords_tag: keywords})
 
@@ -49,28 +55,31 @@ class ImageMetadataManager:
         with pyexiv2.Image(str(path)) as image:
             image.clear_thumbnail()
 
-            # Очистка IPTC
-            image.modify_iptc({
-                iptc_title_tag: '',
-                iptc_object_tag: '',
-                iptc_description_tag: '',
-                iptc_keywords_tag: []
-            })
+            # Получаем метаданные
+            exif_data = image.read_exif()
+            iptc_data = image.read_iptc()
+            xmp_data = image.read_xmp()
 
-            # Очистка EXIF
-            image.modify_exif({
-                exif_title_tag: '',
-                exif_description_tag: '',
-                exif_keywords_tag: ''
-            })
+            # Удаляем нужные теги из словарей, если они есть
+            for tag in [iptc_title_tag, iptc_object_tag, iptc_description_tag, iptc_keywords_tag]:
+                iptc_data.pop(tag, None)
 
-            # Очистка XMP
-            image.modify_xmp({
-                xmp_title_tag: '',
-                xmp_legacy_tag: '',
-                xmp_description_tag: '',
-                xmp_keywords_tag: []
-            })
+            for tag in [exif_title_tag, exif_description_tag, exif_keywords_tag]:
+                exif_data.pop(tag, None)
+
+            for tag in [xmp_title_tag, xmp_legacy_tag, xmp_description_tag, xmp_keywords_tag]:
+                xmp_data.pop(tag, None)
+
+            # Перезаписываем очищенные данные обратно
+            image.modify_exif(exif_data)
+            image.modify_iptc(iptc_data)
+            image.modify_xmp(xmp_data)
+
+        # with pyexiv2.Image(str(path)) as image:
+        #     image.clear_exif()
+        #     image.clear_iptc()
+        #     image.clear_xmp()
+        #     image.clear_thumbnail()
 
     @classmethod
     def path_to_metadata(cls, path: Path=None, metadata: tuple=None):
@@ -91,7 +100,9 @@ class ImageMetadataManager:
     def _get_metadata(path: Path) -> tuple[dict, ...]:
         with pyexiv2.Image(str(path)) as image:
             return (
-                image.read_iptc(),
-                pyexiv2.convert_xmp_to_iptc(pyexiv2.convert_exif_to_xmp(image.read_exif())),
-                pyexiv2.convert_xmp_to_iptc(image.read_xmp())
+                image.read_exif(),
+                #
+                # image.read_iptc(),
+                # pyexiv2.convert_xmp_to_iptc(pyexiv2.convert_exif_to_xmp(image.read_exif())),
+                # pyexiv2.convert_xmp_to_iptc(image.read_xmp())
             )

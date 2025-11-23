@@ -10,6 +10,9 @@ en:
     no_tool: "One module interrupted the start of another. Will try again in {delay} seconds."
     please_wait: "Model asks to wait. Will try again in {delay} seconds."
     on_update: "Current model on update right now."
+    on_fixing: "проходит плановое обслуживание."
+    cant_start_generation: "Model can't start generating this prompt."
+    video_too_long: "Processing error. The video length is too long. Maximum 480p/720p = 10 / 1080p = 5 seconds."
   interface:
     select:
       folder_not_selected: "Folder wasn't selected."
@@ -17,3 +20,4 @@ en:
       file_not_selected: "File wasn't selected."
   timeout_error: "Timeout error."
   wrong_conversation_url: "Wrong conversation URL! Change it in Utils -> Update conversation URL"
+  flood_wait: "Telegram limited your requests for {delay} seconds."

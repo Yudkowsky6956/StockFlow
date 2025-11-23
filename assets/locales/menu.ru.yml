@@ -1,25 +1,49 @@
 ru:
   back: "🡄 Назад"
+  exit: "⛔  Выход"
   main:
     name: "Главное меню"
-    flows: "▶️ Сценарии"
-    scripts: "📜 Скрипты"
-    settings: "⚙️ Настройки"
-    exit: "⛔  Выход"
+    choice: "Главное меню"
   flows:
     name: "Сценарии"
-    GenerateVideosFromPrompts: "Видео из промптов"
-    GenerateVideosFromPhotos: "Видео из фото"
-    ParaphrasePrompts: "Перефразировать промпты"
+    choice: "▶️ Сценарии"
   scripts:
     name: "Скрипты"
-    import_prompts: "Добавить промпты"
-    mark_files_as_done: "Пометить файлы сделанными"
+    choice: "📜 Скрипты"
+    import_prompts:
+      name: "Импортировать подсказки"
+      choice: "Импортировать подсказки"
+
+    clear_metadata:
+      name: "Очистить метаданные"
+      choice: "Очистить метаданные"
+
+    mark_files_as_done:
+      name: "Отметить файлы как выполненные"
+      choice: "Отметить файлы как выполненные"
+
+    parse_sales_data:
+      name: "Спарсить данные продаж"
+      choice: "Спарсить данные продаж"
+
+    show_sales_infographics:
+      name: "Показать графики продаж"
+      choice: "Показать графики продаж"
   settings:
     name: "Настройки"
-    global: "🌐 Глобальные"
-    flows: "▶️ Сценарии"
-  global_settings:
+    choice: "⚙️ Настройки"
+  db_scripts:
+    name: "База данных"
+    choice: "💾 База данных"
+  files_scripts:
+    name: "Файлы"
+    choice: "📁 Файлы"
+  infographics_scripts:
+    name: "Инфографика"
+    choice: "📊 Инфографика"
+  modules:
+    name: "Модули"
+    choice: "🧩 Модули"
+  global:
     name: "Глобальные"
-  flows_settings:
-    name: "Сценарии"
+    choice: "🌐 Глобальные"

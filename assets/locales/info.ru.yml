@@ -1,5 +1,8 @@
 #file: noinspection SpellCheckingInspection
 ru:
+  design:
+    generating: "Генерация фото…"
+    generation_end: "Генерация фото завершена! ✔️"
   video:
     loading_photos: "Загрузка {amount} фото…"
     generating: 'Генерация видео…'
@@ -20,12 +23,17 @@ ru:
       ask_new_database: "Введите имя новой базы данных (без .db)"
       new_database: "➕  Новая база данных"
       video_modules: "Выберите видео-модули"
+      yes_no_message: "Выберите да или нет"
+      yes_answer: "Да"
+      no_answer: "Нет"
     select:
       folder: "Выберите папку"
       file: "Выберите файл"
       files: "Выберите файлы"
       txt: "Выберите текстовый файл"
       txt_filetype: "Текстовый"
+      csv: "Выберите .csv файл"
+      csv_filetype: "CSV"
       photos: "Выберите фото"
       photos_filetype: "Фото"
       videos: "Выберите видео"
@@ -44,10 +52,18 @@ ru:
     mark_files_as_done:
       files_found: "Найдено {amount} файлов, подходящих под формат \"MODULE_HASH.jpg\" или \"MODULE_HASH.mp4\" (например \"VEO_6cbdab32.jpg\")."
       marked_done: "Помечено как сделанные {amount} записей в базе \"{database}\"."
+    clear_metadata:
+      message: "Выберите фото для очистки метаданных"
+      photos_selected: "Было выбрано {amount} фото для очистки метаданных."
+      final: "Успешно очищено {amount} фото."
   database:
     ensure_hash:
       rows_found: "Найдено {amount} строк в которых нужно создать хэш."
-      start: "Начинаю создание хэшей..."
+      start: "Начинаю создание хэшей…"
       progress: "Выполнено {percent}% ({processed}/{total}): заполнен hash до id={last_id}"
       done: "Создание хэшей завершено."
     imported_prompts: "Импортировано {amount} промптов."
+  flows:
+    generate_metadata:
+      progress: "Генерация метаданных"
+      unit: "фото"

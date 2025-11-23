@@ -1,38 +1,47 @@
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 import json
+import asyncio
 
-from pyrogram.types import Message
 import aiohttp
 from bs4 import BeautifulSoup
 from i18n import t
 
 from src.core.pyrogram.filters import has_inline_button
-from .module import CategoryModule
-from .vars import GPT_NAME, GPT_MESSAGE, GPT_RESPONSE, GPT_VIEW_FULL_DIALOG
-from .exceptions import GenerationError
+from src.modules.core_module import CategoryModule
+from src.modules.vars import GPT_NAME, GPT_MESSAGE, GPT_RESPONSE, GPT_VIEW_FULL_DIALOG
+from src.core.syntx.exceptions import GenerationError
+from src.utils.sentances import compile_prompt
 
 
 class GPTModule(CategoryModule):
-    syntx_name = GPT_NAME
     category_message = GPT_MESSAGE
     category_response = GPT_RESPONSE
 
     URL_CHECK_FLAG = False
+    last_send_time: float = 0
+    send_delay: float = 6.0
 
 
     @classmethod
     async def _generate(cls, prompt: str, logger, photo: Path | list[Path] | None = None):
         async with cls.syntx_lock:
             await cls.start()
+            # now = asyncio.get_event_loop().time()
+            # wait_time = cls.last_send_time + cls.send_delay - now
+            # if wait_time > 0:
+            #     await asyncio.sleep(wait_time)
             prompt_message = await cls.bot().send(text=prompt, logger=logger, photo=photo)
-            logger.info(t("info.gpt.generating"))
+            # cls.last_send_time = asyncio.get_event_loop().time()
             after_time = cls.get_time()
-        message = await cls.bot().wait_for(
-            flt=has_inline_button(GPT_VIEW_FULL_DIALOG),
-            message=prompt_message,
-            reply=True
-        )
+            gpt_task = asyncio.create_task(cls.bot().wait_for(
+                flt=has_inline_button(GPT_VIEW_FULL_DIALOG),
+                message=prompt_message,
+                reply=True
+            ))
+            logger.info(t("info.gpt.generating"))
+            await asyncio.sleep(6)
+        message = await gpt_task
         url = await cls.get_button_url(message, GPT_VIEW_FULL_DIALOG)
         message_text = await cls.get_answer_text(prompt_message, after_time, url)
         logger.info(t("info.gpt.generation_end"))
@@ -40,7 +49,7 @@ class GPTModule(CategoryModule):
 
     @classmethod
     async def _run(cls, name: str, logger, prompt: str, database, photo: Path | list[Path] | None = None):
-        prompt = f"{name} {prompt}"
+        prompt = compile_prompt(name, prompt)
         return await cls._generate(prompt=prompt, photo=photo, logger=logger)
 
     @staticmethod

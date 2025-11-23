@@ -1,0 +1,81 @@
+ru:
+  default:
+    database:
+      name: "База данных"
+      message: "Выберите базу данных"
+      description: "База данных, которая используется сценарием."
+    video_modules:
+      name: "Видео модули"
+      message: "Выберите видео-модули"
+      description: "Видео модули, которые используются сценарием. (Пробел - переключить, Enter - подтвердить)"
+    photo_modules:
+      name: "Фото модули"
+      message: "Выберите фото-модули"
+      description: "Фото модули, которые используются сценарием. (Пробел - переключить, Enter - подтвердить)"
+    gen_amount:
+      name: "Количество генераций"
+      message: "Введите кол-во генераций"
+      description: "Количество генераций, которое нужно сделать данному сценарию."
+    prompt:
+      name: "Промпт"
+      message: "Введите промпт"
+      description: "Промпт, который используется сценарием."
+    upscale:
+      name: "Апскейл"
+      message: "Апскейлить или нет"
+      description: ""
+
+  GenerateVideosFromPrompts:
+    name: "Видео из промптов"
+    choice: "Видео из промптов"
+    progress_bar: "Генерация видео"
+    progress_unit: "промпт"
+
+  GenerateVideosFromPhotos:
+    name: "Видео из фото"
+    choice: "Видео из фото"
+    progress_bar: "Генерация видео"
+    progress_unit: "фото"
+
+  GeneratePhotosFromPrompts:
+    name: "Фото из промптов"
+    choice: "Фото из промптов"
+    progress_bar: "Генерация фото"
+    progress_unit: "промпт"
+
+  ParaphrasePrompts:
+    name: "Перефразировать промпты"
+    choice: "Перефразировать промпты"
+    pre_template:
+      name: "Шаблон для GPT"
+      message: "Введите шаблон для GPT"
+      description: "Шаблон перед перефразированием. В нём должно содержаться {prompt} - место куда вставлять ещё не перефразированный промпт. Должно указывать GPT, что нужно вернуть JSON-код с одним параметром - prompt."
+    post_template:
+      name: "Шаблон финальный"
+      message: "Введите финальный шаблон"
+      description: "Шаблон после перефразирования. В нём должно содержаться {prompt} - место куда вставлять уже перефразированный промпт."
+    progress_bar: "Перефразирование промптов"
+    progress_unit: "промпт"
+
+  GenerateMetadata:
+    name: "Генерировать метаданные"
+    choice: "Генерировать метаданные"
+    gpt_template:
+      name: "Шаблон для GPT"
+      message: "Введите шаблон для GPT"
+      description: "Шаблон перед GPT. В нём должно содержаться {keywords_amount} - место куда вставлять кол-во ключевых слов. Должно указывать GPT, что нужно вернуть JSON-код с данными параметрами: \"description\", \"keywords\"."
+    progress_bar: "Генерация метаданных"
+    progress_unit: "фото"
+
+  GeneratePromptsPhotosVideos:
+    name: "Фото по промптам, видео по фото"
+    choice: "Фото по промптам, видео по фото"
+    progress_bar: "Генерация фото и видео"
+    progress_unit: "промпт"
+
+  progress_bar:
+    successful: "✅ Успешно"
+    errors: "❌ Ошибки"
+    processing: "🔄 Выполняются"
+    queue: "⏳ В очереди"
+    premade: "📀 Уже сделанные"

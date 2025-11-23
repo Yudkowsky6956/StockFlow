@@ -1,9 +1,13 @@
 import argparse
+import pyrogram
 
 from src.core.logger import setup_logger
-from src.interface.menu import MainMenu
+from src.interface.main_menu import MainMenu
 import src.core.global_config as config
 
+
+def main():
+    MainMenu.run_menu()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -25,5 +29,5 @@ if __name__ == '__main__':
     config.LANG = args.lang
     setup_logger()
 
-    MainMenu.run()
+    main()
 

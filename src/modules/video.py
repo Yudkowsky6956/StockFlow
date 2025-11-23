@@ -4,12 +4,16 @@ from typing import List, Optional, Union, Tuple
 from i18n import t
 from playwright.async_api import async_playwright
 from pyrogram.types import Message
+from playwright import async_api
 
+from src.core.syntx.exceptions import GenerationError
 from src.core.pyrogram.filters import contains
 import src.core.global_config as config
-from .module import AgentModule
-from .vars import *
+from src.modules.core_module import AgentModule
+from src.modules.vars import *
 from src.modules.vars import EMPTY_PROMPT
+from src.core.database import Database
+from src.utils.sentances import compile_prompt
 
 
 class VideoModule(AgentModule):
@@ -50,9 +54,10 @@ class VideoModule(AgentModule):
         return await cls.bot().download(message, path)
 
     @classmethod
-    async def _run(cls, name: str, logger, prompt: str, destination: Path, photo: Path | list[Path] | None = None):
-        model_and_name = f"{cls.syntx_name}_{name}"
-        prompt = f"{model_and_name} {prompt}"
+    async def _run(cls, name: str, logger, prompt: str, database: Database, destination: Path, photo: Path | list[Path] | None = None):
+        config = cls.get_config()
+        model_and_name = f"{config["name"]}_{name}"
+        prompt = compile_prompt(model_and_name, prompt)
         message = await cls._generate(prompt=prompt, photo=photo, logger=logger)
         return await cls.download(message, destination / f"{model_and_name}.mp4")
 
@@ -77,7 +82,7 @@ class VideoInBot(VideoModule):
             logger=logger,
             request_message=generating_message
         )
-
+        logger.info(t("info.video.generation_end"))
         return message
 
 
@@ -86,16 +91,20 @@ class VideoMiniApp(VideoModule):
     @classmethod
     async def _generate_from_photo(cls, message: Message, logger, prompt: Optional[str] = None):
         url = await cls.get_button_url(message, VIDEO_URL_BUTTON)
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=not config.DEBUG)
-            page = await browser.new_page()
-            await page.goto(url)
-            if prompt:
-                prompt_input = await page.query_selector("#prompt")
-                await prompt_input.click()
-                await prompt_input.fill(prompt)
-            submit_button = await page.query_selector("#crop")
-            await submit_button.click()
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=not config.DEBUG)
+                page = await browser.new_page()
+                await page.goto(url)
+                if prompt:
+                    prompt_input = await page.query_selector("#prompt")
+                    await prompt_input.click()
+                    await prompt_input.fill(prompt)
+                submit_button = await page.query_selector("#crop")
+                await submit_button.click()
+        except (async_api.TimeoutError, AttributeError):
+            raise GenerationError(t("error.timeout_error"))
+
 
     @classmethod
     async def _generate(cls, logger, prompt: Optional[str] = None, photo: Path | list[Path] | None = None) -> Message:

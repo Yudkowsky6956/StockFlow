@@ -3,6 +3,7 @@ from datetime import datetime
 
 import i18n
 from loguru import logger
+from tqdm import tqdm
 
 from src.utils.hash import get_color_hash
 import src.core.global_config as config
@@ -70,8 +71,9 @@ def setup_logger():
 
     # Console
     logger.add(
-        sys.stdout,
+        sink=lambda msg: tqdm.write(msg, end=""),
         format=formatter,
         level="DEBUG" if config.DEBUG else "INFO",
-        colorize=True
+        colorize=True,
+        enqueue=True,
     )

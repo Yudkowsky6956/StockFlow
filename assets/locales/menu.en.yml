@@ -1,25 +1,49 @@
 en:
   back: "🡄 Back"
+  exit: "⛔  Exit"
   main:
     name: "Main menu"
-    flows: "▶️ Flows"
-    scripts: "📜 Scripts"
-    settings: "⚙️ Settings"
-    exit: "⛔  Exit"
+    choice: "Main menu"
   flows:
     name: "Flows"
-    GenerateVideosFromPrompts: "Prompts to video"
-    GenerateVideosFromPhotos: "Photos to video"
-    ParaphrasePrompts: "Paraphrase prompts"
+    choice: "▶️ Flows"
   scripts:
     name: "Scripts"
-    import_prompts: "Import prompts"
-    mark_files_as_done: "Mark files as done"
+    choice: "📜 Scripts"
+    import_prompts:
+      name: "Import prompts"
+      choice: "Import prompts"
+
+    clear_metadata:
+      name: "Clear metadata"
+      choice: "Clear metadata"
+
+    mark_files_as_done:
+      name: "Mark files as done"
+      choice: "Mark files as done"
+
+    parse_sales_data:
+      name: "Parse sales data"
+      choice: "Parse sales data"
+
+    show_sales_infographics:
+      name: "Show sales infographics"
+      choice: "Show sales infographics"
   settings:
     name: "Settings"
-    global: "🌐 Global"
-    flows: "▶️ Flows"
-  global_settings:
+    choice: "⚙️ Settings"
+  db_scripts:
+    name: "Database"
+    choice: "💾 Database"
+  files_scripts:
+    name: "Files"
+    choice: "📁 Files"
+  infographics_scripts:
+    name: "Infographics"
+    choice: "📊 Infographics"
+  modules:
+    name: "Modules"
+    choice: "🧩 Modules"
+  global:
     name: "Global"
-  flows_settings:
-    name: "Flows"
+    choice: "🌐 Global"

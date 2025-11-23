@@ -38,6 +38,18 @@ BLOCK_5 = HandlerError(
     mark=True,
     reply=True
 )
+BLOCK_6 = HandlerError(
+    message="заблокировал запрос",
+    log="error.handlers.block",
+    mark=True,
+    reply=True
+)
+BLOCK_7 = HandlerError(
+    message="Произошла ошибка. Пожалуйста, попробуйте еще раз.",
+    log="error.handlers.block",
+    mark=True,
+    reply=True
+)
 TOO_SHORT = HandlerError(
     message="Ошибка: too short",
     log="error.handlers.too_short",
@@ -99,6 +111,27 @@ ON_UPDATE = HandlerError(
     reply=False,
     lock=True
 )
+ON_FIXING = HandlerError(
+    message="проходит плановое обслуживание.",
+    log="error.handlers.on_fixing",
+    delay=60 * 10,
+    reply=False,
+    lock=True
+)
+CANT_START_GENERATION = HandlerError(
+    message="не смог запустить в работу указанный промпт",
+    log="error.handlers.cant_start_generation",
+    delay=60,
+    reply=False,
+    lock=True,
+    mark=False,
+)
+VIDEO_TOO_LONG = HandlerError(
+    message="❌ Ошибка обработки. Длительность видео слишком высока. Максимум 480p/720p = 10 / 1080p = 5 секунд.",
+    log="error.handlers.video_too_long",
+    fatal=True,
+)
+
 
 
 
@@ -108,8 +141,8 @@ AFTER_REQUEST_ERROR = [
 
 
 ALL_ERRORS = [
-    BLOCK_1, BLOCK_2, BLOCK_3, BLOCK_4, BLOCK_5, TOO_SHORT,
+    BLOCK_1, BLOCK_2, BLOCK_3, BLOCK_4, BLOCK_5, BLOCK_6, BLOCK_7, TOO_SHORT,
     BLOCK_FULL, MODEL_ERROR_1, YOU_ALREADY_LOAD_IMAGE,
     WAIT_UNTIL_NEXT_REQUEST, MODEL_ERROR_2, REQUEST_LIMIT, NO_TOOL,
-    PLEASE_WAIT, ON_UPDATE,
+    PLEASE_WAIT, ON_UPDATE, ON_FIXING, CANT_START_GENERATION, VIDEO_TOO_LONG,
 ]

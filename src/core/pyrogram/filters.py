@@ -14,7 +14,7 @@ def startswith(text: str):
             return html.unescape(message.text).startswith(flt.text)
         elif message.caption:
             return html.unescape(message.caption).startswith(flt.text)
-    return (filters.text | filters.caption) & filters.create(func, text=text)
+    return (filters.text | filters.caption) & filters.create(func, text=text.strip())
 
 def endswith(text: str):
     async def func(flt, _, message: Message):
@@ -22,7 +22,19 @@ def endswith(text: str):
             return html.unescape(message.text).endswith(flt.text)
         elif message.caption:
             return html.unescape(message.caption).endswith(flt.text)
-    return (filters.text | filters.caption) & filters.create(func, text=text)
+    return (filters.text | filters.caption) & filters.create(func, text=text.strip())
+
+def button_map_filter(expected_map):
+    """Создает фильтр для сообщений с кнопками, совпадающими с expected_map"""
+    async def func(_, __, message: Message):
+        if not message.reply_markup or not getattr(message.reply_markup, "inline_keyboard", None):
+            return False
+        actual_map = []
+        for row in message.reply_markup.inline_keyboard:
+            # Собираем текст всех кнопок в ряду
+            actual_map.append([button.text for button in row])
+        return actual_map == expected_map
+    return filters.create(func)
 
 def contains(text: str):
     async def func(flt, _, message: Message):
@@ -30,7 +42,7 @@ def contains(text: str):
             return flt.text in html.unescape(message.text)
         elif message.caption:
             return flt.text in html.unescape(message.caption)
-    return (filters.text | filters.caption) & filters.create(func, text=text)
+    return (filters.text | filters.caption) & filters.create(func, text=text.strip())
 
 def message_exists(ext_message: Message):
     async def func(flt, _, message: Message):
@@ -43,7 +55,7 @@ def equals(text: str):
             return html.unescape(message.text) == flt.text
         elif message.caption:
             return html.unescape(message.caption) == flt.text
-    return (filters.text | filters.caption) & filters.create(func, text=text)
+    return (filters.text | filters.caption) & filters.create(func, text=text.strip())
 
 def is_replying_to(target_message: Message):
     async def func(flt, _, message: Message):

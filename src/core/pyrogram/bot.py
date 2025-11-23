@@ -9,7 +9,7 @@ from pyrogram.enums import ParseMode
 from pyrogram.types import ChatEventFilter, InputMediaPhoto, Message
 
 from src.utils.sentances import wrap_by_words
-from .filters import is_replying_to
+from .filters import is_replying_to, button_map_filter
 
 
 class TelegramBot:
@@ -122,7 +122,7 @@ class TelegramBot:
                 media.append(InputMediaPhoto(str(photo)))
         return media
 
-    async def wait_for_future(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger, future=None, local_handlers=None) -> asyncio.Future:
+    async def wait_for_future(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger, future=None, local_handlers=None, photo=None, button_map=None) -> asyncio.Future:
         """Waits for Filter message to arrive/edit and returns future"""
         logger.debug(f"Waiting response for {self._compose_log(message.text or message.caption, None)}.")
         if not future:
@@ -141,23 +141,32 @@ class TelegramBot:
 
         if reply:
             flt = flt & is_replying_to(message)
+        if button_map:
+            flt = flt & button_map_filter(button_map)
+        # if photo:
+        #     flt = flt & upscaled_image_filter(photo)
         if send:
             local_handlers.append(self.message_handler(_finish_wait, flt))
         if edit:
             local_handlers.append(self.edited_message_handler(_finish_wait, flt))
         return future
 
-    async def wait_for(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger, future=None) -> Message:
+    async def wait_for(self, flt, message: Optional[Message] = None, send=True, edit=True, reply=False, logger=default_logger, future=None, photo=None, button_map=None) -> Message:
         """Waits for Filter message to arrive/edit and returns message"""
         if not future:
             future = asyncio.get_event_loop().create_future()
-        future = await self.wait_for_future(flt, message, send, edit, reply, logger, future)
+        future = await self.wait_for_future(flt, message, send, edit, reply, logger, future, photo=photo, button_map=button_map)
         return await future
 
     async def delete(self, message: Message, logger=default_logger):
         """Deletes a Message"""
         logger.debug(f"Deleting message with {self._compose_log(message.text or message.caption, None)}")
         await self.client.delete_messages(self.id, message.id)
+
+    async def click(self, message: Message, text: str, logger=default_logger):
+        """Clicks a button on message with text"""
+        logger.debug(f"Clicking button with text: \"{text}\".")
+        await message.click(text)
 
     async def download(self, message: Message, path: Path, logger=default_logger) -> Path:
         """Downloads file from Message and returns Path"""

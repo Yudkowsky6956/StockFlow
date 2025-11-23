@@ -1,0 +1,77 @@
+en:
+  default:
+    database:
+      name: "Database"
+      message: "Select database"
+      description: "Database that flow uses."
+    video_modules:
+      name: "Video modules"
+      message: "Select video modules"
+      description: "Video modules that flow uses. (Space - toggle, Enter - confirm)"
+    gen_amount:
+      name: "Generations amount"
+      message: "Enter generations amount"
+      description: "Amount of generations for flow."
+    prompt:
+      name: "Prompt"
+      message: "Enter prompt"
+      description: "Prompt that flow uses."
+    upscale:
+      name: "Upscale"
+      message: "Upscale or not"
+      description: "Should program upscale images?"
+
+  GenerateVideosFromPrompts:
+    name: "Videos from prompts"
+    choice: "Video from prompts"
+    progress_bar: "Videos generation"
+    progress_unit: "prompt"
+
+  GenerateVideosFromPhotos:
+    name: "Videos from photos"
+    choice: "Video from photos"
+    progress_bar: "Videos generation"
+    progress_unit: "photo"
+
+  GeneratePhotosFromPrompts:
+    name: "Photo from prompts"
+    choice: "Photo from prompts"
+    progress_bar: "Photos generation"
+    progress_unit: "prompt"
+
+  ParaphrasePrompts:
+    name: "Paraphrase prompts"
+    choice: "Paraphrase prompts"
+    pre_template:
+      name: "Template for GPT"
+      message: "Enter template for GPT"
+      description: "Preprocessing prompt. It must contain {prompt} - where goes original prompt. It should contain instruction for GPT, that it must return JSON-code with only one parameter - prompt"
+    post_template:
+      name: "Final template"
+      message: "Enter final template"
+      description: "Postprocessing prompt. It must contain {prompt} - where goes paraphrased prompt."
+    progress_bar: "Prompt paraphrasing"
+    progress_unit: "prompt"
+
+  GenerateMetadata:
+    name: "Generate metadata"
+    choice: "Generate metadata"
+    gpt_template:
+      name: "Template for GPT"
+      message: "Enter template for GPT"
+      description: "Preprocessing prompt. It must contain {keywords_amount} - where goes amount of keywords to generate. It should contain instruction for GPT, that it must return JSON-code with these parameters: \"description\", \"keywords\"."
+    progress_bar: "Metadata generation"
+    progress_unit: "photo"
+
+  GeneratePromptsPhotosVideos:
+    name: "Photo from prompts, video from photos"
+    choice: "Photo from prompts, video from photos"
+    progress_bar: "Photo and video generation"
+    progress_unit: "prompt"
+
+  progress_bar:
+    successful: "✅ Success"
+    errors: "❌ Errors"
+    processing: "🔄 Processing"
+    queue: "⏳ Queue"
+    premade: "📀 Premade"

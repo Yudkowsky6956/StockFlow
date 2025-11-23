@@ -31,3 +31,5 @@ class ImageFile:
     def keywords(self, value: list):
         ImageMetadataManager.set_keywords(self.path, value)
 
+    def clear(self):
+        ImageMetadataManager.clear_metadata(self.path)

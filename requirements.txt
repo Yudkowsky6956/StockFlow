@@ -12,6 +12,11 @@ python-i18n[YAML]
 phonenumbers
 dotenv
 loguru
+tqdm
+InquirerPy
+pyexiv2
+aiohttp
+bs4
 
 # Development
 pytest

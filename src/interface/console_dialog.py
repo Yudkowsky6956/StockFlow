@@ -3,7 +3,7 @@ from InquirerPy.base import Choice
 from i18n import t
 
 from src.core.vars import DATABASE_FOLDER
-from src.modules import VIDEO_MODULES
+from src.modules import VIDEO_MODULES, PHOTO_MODULES
 
 
 
@@ -67,3 +67,36 @@ def ask_video_modules(message: str = "info.interface.ask.video_modules", default
     if answer == back_message:
         raise KeyboardInterrupt
     return answer
+
+def ask_photo_modules(message: str = "info.interface.ask.photo_modules", default=None, **kwargs) -> list:
+    """Выбор видео модуля"""
+    back_message = t("menu.back")
+    if not default:
+        default = []
+    choices = [Choice(key, enabled=key in default) for key in PHOTO_MODULES.keys()]
+    answer = inquirer.checkbox(
+        message=f"{t(message)}:",
+        choices=choices,
+        default=tuple(default),
+        **kwargs
+    ).execute()
+    if answer == back_message:
+        raise KeyboardInterrupt
+    return answer
+
+def ask_double(message: str = "info.interface.ask.double.message", **kwargs) -> bool:
+    """Выбор делать двойные ключи или нет"""
+    single = t("info.interface.ask.double.single")
+    double = t("info.interface.ask.double.double")
+
+    answer = inquirer.select(message=f"{t(message)}:", choices=[single, double], default=single, **kwargs).execute()
+    return answer == double
+
+def ask_yes_no(message: str = "info.interface.ask.yes_no_message", **kwargs) -> bool:
+    """Выбор да или нет"""
+    back_message = t("menu.back")
+    yes = t("info.interface.ask.yes_answer")
+    no = t("info.interface.ask.no_answer")
+
+    answer = inquirer.select(message=f"{t(message)}:", choices=[back_message, yes, no], **kwargs).execute()
+    return answer == yes

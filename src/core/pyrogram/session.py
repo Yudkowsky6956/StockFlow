@@ -144,6 +144,7 @@ class Session:
 
     @classmethod
     def current(cls):
+        SESSION_CURRENT.touch()
         return SESSION_CURRENT.read_text()
 
     @classmethod

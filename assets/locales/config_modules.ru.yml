@@ -1,0 +1,55 @@
+ru:
+  default:
+    name:
+      name: "Имя модуля"
+      message: "Введите имя модуля"
+      description: "Определяет то, как будет записана модель в базе данных. Не рекомендуется к изменению."
+    color:
+      name: "Цвет модуля"
+      message: "Введите цвет модуля"
+      description: "Определяет цвет модуля в консоли. Записывается в формате HEX (например, #FFFFFF - белый)"
+    timeout:
+      name: "Таймаут"
+      message: "Введите кол-во секунд до таймаута"
+      description: "Через какое время модуль выдаст ошибку, не дождавшись результата, в секундах."
+    batch_size:
+      name: "Одновременные генерации"
+      message: "Введите кол-во одновременных генераций"
+      description: "Сколько одновременно запросов может генерироваться модулем."
+    flags:
+      name: "Флаги"
+      message: "Введите флаги для модуля"
+      description: "Добавляет данные флаги перед промптом, чтобы точнее контролировать генерацию. (например --ar 16:9 у Midjourney задаёт отношение сторон при генерации). Писать через пробел."
+
+  Veo:
+    name: "Veo"
+    choice: "⭕  Veo"
+
+  Runway:
+    name: "RunWay"
+    choice: "🎞️ RunWay: Gen-4"
+
+  Sora:
+    name: "Sora"
+    choice: "🌙 Sora"
+
+  MiniMax:
+    name: "MiniMax"
+    choice: "🎦 Hailuo MiniMax"
+
+  Luma:
+    name: "Luma"
+    choice: "📽️ Luma: DM"
+
+  GPT:
+    name: "GPT"
+    choice: "💡 GPT"
+
+  Midjourney:
+    name: "MidJourney"
+    choice: "🌄 MidJourney"
+
+  Nano:
+    name: "Nano"
+    choice: "🍌 Nano"
+

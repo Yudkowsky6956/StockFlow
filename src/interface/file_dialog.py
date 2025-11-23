@@ -15,7 +15,7 @@ def _get_root():
 
 def select_folder(title: str = "info.interface.select.folder", **kwargs) -> Path:
     """Общая функция для выбора папки."""
-    logger.info(f"{title}...")
+    logger.info(f"{title}…")
     folder = filedialog.askdirectory(title=t(title), parent=_get_root(), **kwargs)
     if folder:
         return Path(folder)
@@ -23,7 +23,7 @@ def select_folder(title: str = "info.interface.select.folder", **kwargs) -> Path
 
 def select_files(title: str = "info.interface.select.files", **kwargs):
     """Общая функция для выбора файлы."""
-    logger.info(f"{title}...")
+    logger.info(f"{title}…")
     files = filedialog.askopenfilenames(title=t(title), parent=_get_root(), **kwargs)
     if files:
         return [Path(file) for file in files]
@@ -31,15 +31,19 @@ def select_files(title: str = "info.interface.select.files", **kwargs):
 
 def select_file(title: str = "info.interface.select.file", **kwargs):
     """Общая функция для выбора файла"""
-    logger.info(f"{title}...")
+    logger.info(f"{title}…")
     file = filedialog.askopenfilename(title=t(title), parent=_get_root(), **kwargs)
     if file:
         return Path(file)
     raise RuntimeError(t("error.interface.select.file_not_selected"))
 
 def select_txt(title: str = "info.interface.select.txt", filetype: str = "info.interface.select.txt_filetype", **kwargs):
-    """Выбор изображений."""
+    """Выбор .txt файла."""
     return select_file(title=t(title), filetypes=[(t(filetype), "*.txt")], **kwargs)
+
+def select_scv(title: str = "info.interface.select.csv", filetype: str = "info.interface.select.csv_filetype", **kwargs):
+    """Выбор .scv файла."""
+    return select_file(title=t(title), filetypes=[(t(filetype), "*.csv")], **kwargs)
 
 def select_photos(title: str = "info.interface.select.photos", filetype: str = "info.interface.select.photos_filetype", **kwargs):
     """Выбор изображений."""
