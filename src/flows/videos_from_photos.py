@@ -15,29 +15,41 @@ class GenerateVideosFromPhotos(CoreFlow):
     CONFIG_PARAMETERS = ["database", "prompt", "video_modules"]
 
     @classmethod
-    async def _run(cls, tasks: list, config: dict) -> list:
+    async def _run(cls) -> list:
+        default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
+
         photos = select_photos()
-        modules_names = config.get("video_modules")
-        modules_objects = get_modules_objects(modules_names)
+        destination = select_video_folder()
 
-        database_name = config.get("database")
+        flow_config = cls.get_config()
+        modules_names = flow_config.get("video_modules")
+        database_name = flow_config.get("database")
+        prompt = flow_config.get("prompt")
+        unit = t(f"config_flows.{cls.__name__}.progress_unit")
+
+        modules = get_modules_objects(modules_names)
+        tasks = []
+        results = []
+
         with Database(database_name) as db:
+            async with SyntxBot().client:
+                for module in modules:
+                    module_name = module.get_name()
+                    module_color = module.get_color()
+                    module_tasks = []
 
-            prompt = config.get("prompt")
-            destination = select_video_folder()
-
-            bot = SyntxBot()
-            async with bot.client:
-                for photo in photos:
-                    name = photo.stem
-                    for module in modules_objects:
-                        config = module.get_config()
-                        logger = default_logger.bind(name=name, module_name=config["name"], module_color=config["color"])
-                        tasks.append(
+                    for photo in photos:
+                        name = photo.stem
+                        module_logger = default_logger.bind(
+                            name=name,
+                            module_name=module_name,
+                            module_color=module_color
+                        )
+                        module_tasks.append(
                             asyncio.create_task(
                                 module.run(
                                     name=name,
-                                    logger=logger,
+                                    logger=module_logger,
                                     photo=photo,
                                     prompt=prompt,
                                     destination=destination,
@@ -45,5 +57,17 @@ class GenerateVideosFromPhotos(CoreFlow):
                                 )
                             )
                         )
-                results = await tqdm_asyncio.gather(*tasks, desc=t(f"config_flows.{cls.__name__}.progress_bar"), unit=t(f"config_flows.{cls.__name__}.progress_unit"))
+                    tasks.append(
+                        asyncio.create_task(
+                            tqdm_asyncio.gather(
+                                *module_tasks,
+                                desc=f"{module_name:<11}",
+                                unit=unit
+                            )
+                        )
+                    )
+
+                nested_results = await asyncio.gather(*tasks)
+                for result in nested_results:
+                    results.extend(result)
                 return results

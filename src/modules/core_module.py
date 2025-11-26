@@ -21,6 +21,7 @@ class CoreModule(SettingsMixin):
     semaphore = None
     CONFIG_PATH = MODULES_YML
     LOCALE_NAME = "config_module"
+    output_amount = 1
 
     @classmethod
     async def _generate(cls, *args, **kwargs) -> Message:
@@ -36,6 +37,22 @@ class CoreModule(SettingsMixin):
         if not cls.semaphore:
             cls.semaphore = asyncio.Semaphore(config.get("batch_size", 1))
         return cls.semaphore
+
+    @classmethod
+    def get_name(cls):
+        return cls.get_config().get("name", "TEMPLATE")
+
+    @classmethod
+    def get_color(cls):
+        return cls.get_config().get("color", "#FFFFFF")
+
+    @classmethod
+    def get_timeout(cls):
+        return cls.get_config().get("timeout", 3600)
+
+    @classmethod
+    def get_batch_size(cls):
+        return cls.get_config().get("batch_size", 1)
 
 
 class SyntxModule(CoreModule):

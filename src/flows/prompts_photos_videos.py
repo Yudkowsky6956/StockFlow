@@ -1,6 +1,5 @@
 import asyncio
-
-from tqdm.asyncio import tqdm_asyncio
+from tqdm import tqdm
 from loguru import logger as default_logger
 from i18n import t
 
@@ -15,51 +14,114 @@ class GeneratePromptsPhotosVideos(CoreFlow):
     CONFIG_PARAMETERS = ["database", "gen_amount", "upscale", "photo_modules", "video_modules"]
 
     @classmethod
-    async def _task(cls, name, database, prompt, photo_module, video_modules, destination):
-        results = []
-        config = photo_module.get_config()
-        logger = default_logger.bind(name=name, module_name=config["name"], module_color=config["color"])
-        images = await photo_module.run(name=name, logger=logger, database=database, prompt=prompt, destination=destination)
-        if images:
-            for image in images:
-                for video_module in video_modules:
-                    config = video_module.get_config()
-                    logger = default_logger.bind(name=name, module_name=config["name"], module_color=config["color"])
-                    video = await video_module.run(name=name, prompt=prompt, photo=image, logger=logger, database=database, mark=False, destination=destination)
-                    results.append(video)
-        return results
+    async def _run(cls) -> tuple[list, list]:
+        default_logger.success(
+            f"{t('info.flows.starting_flow')}: "
+            f"{t(f'config_flows.{cls.__name__}.choice')}"
+        )
 
-    @classmethod
-    async def _run(cls, tasks: list, config: dict) -> list:
         destination = select_photo_folder()
-        amount = config.get("gen_amount")
-        photo_modules_names = config.get("photo_modules")
-        photo_modules_objects = get_modules_objects(photo_modules_names)
-        video_modules_names = config.get("video_modules")
-        video_modules_objects = get_modules_objects(video_modules_names)
+        cfg = cls.get_config()
+        amount = cfg.get("gen_amount")
+        database_name = cfg.get("database")
+        photo_modules_names = cfg.get("photo_modules")
+        video_modules_names = cfg.get("video_modules")
+        unit = t(f"config_flows.{cls.__name__}.progress_unit")
 
-        database_name = config.get("database")
+        photo_modules = get_modules_objects(photo_modules_names)
+        video_modules = get_modules_objects(video_modules_names)
+
+        photo_results = []
+        video_results = []
+
+        # прогресс-бары для видео: photo_module -> video_module
+        video_bars = {
+            pm: {vm: tqdm(total=amount*pm.output_amount,
+                          desc=f"{pm.get_name():<11} {vm.get_name():<11}",
+                          unit=unit)
+                 for vm in video_modules}
+            for pm in photo_modules
+        }
+
         with Database(database_name) as db:
-            rows = db.get(amount=amount, modules=photo_modules_objects)
+            all_rows = db.get(amount=amount, modules=photo_modules_names)
 
-            bot = SyntxBot()
-            async with bot.client:
-                for row in rows:
-                    name = row.hash
-                    paraphrased = row.alt_prompt
-                    for module in photo_modules_objects:
-                        tasks.append(
-                            asyncio.create_task(
-                                cls._task(
-                                    name=name,
-                                    database=db,
-                                    prompt=paraphrased,
-                                    photo_module=module,
-                                    video_modules=video_modules_objects,
-                                    destination=destination
+            async with SyntxBot().client:
+
+                loop = asyncio.get_event_loop()
+                all_tasks = set()  # общий набор всех задач
+
+                # --- callback ---
+
+                def make_photo_done(bar, photo_module, paraphrased):
+                    def callback(task: asyncio.Task):
+                        try:
+                            photos = task.result()
+                            if not isinstance(photos, list):
+                                photos = [photos]
+                            if photos:
+                                photo_results.extend(photos)
+                        finally:
+                            bar.update()
+
+                        missing_photos = photo_module.output_amount - len(photos)
+                        if missing_photos > 0:
+                            for vm in video_modules:
+                                vbar = video_bars[photo_module][vm]
+                                vbar.update(missing_photos)
+
+                        # сразу создаём видео задачи для каждого фото
+                        for photo in photos:
+                            for vm in video_modules:
+                                vbar = video_bars[photo_module][vm]
+                                video_logger = default_logger.bind(
+                                    name=photo.stem,
+                                    module_name=vm.get_name(),
+                                    module_color=vm.get_color(),
                                 )
+                                vtask = loop.create_task(
+                                    vm.run(
+                                        name=photo.stem,
+                                        prompt=paraphrased,
+                                        photo=photo,
+                                        logger=video_logger,
+                                        database=db,
+                                        mark=False,
+                                        destination=destination,
+                                    )
+                                )
+                                vtask.add_done_callback(lambda t, b=vbar: b.update())
+                                all_tasks.add(vtask)
+                    return callback
+
+                # --- создаём фото задачи ---
+                for pm in photo_modules:
+                    pm_name = pm.get_name()
+                    pm_color = pm.get_color()
+                    pm_rows = all_rows[pm_name]
+                    pm_bar = tqdm(total=amount, desc=f"{pm_name:<23}", unit=unit)
+
+                    for row in pm_rows:
+                        paraphrased = row.alt_prompt
+                        name = row.hash
+                        logger = default_logger.bind(
+                            name=name,
+                            module_name=pm_name,
+                            module_color=pm_color,
+                        )
+                        task = loop.create_task(
+                            pm.run(
+                                name=name,
+                                logger=logger,
+                                database=db,
+                                prompt=paraphrased,
+                                destination=destination,
                             )
                         )
-                results = await tqdm_asyncio.gather(*tasks, desc=t(f"config_flows.{cls.__name__}.progress_bar"), unit=t(f"config_flows.{cls.__name__}.progress_unit"))
-                results = [x for row in results for x in row]
-                return results
+                        task.add_done_callback(make_photo_done(pm_bar, pm, paraphrased))
+                        all_tasks.add(task)
+
+                # ждём завершения всех задач (фото + видео)
+                await asyncio.gather(*all_tasks)
+
+        return photo_results, video_results

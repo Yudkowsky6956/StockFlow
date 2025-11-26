@@ -18,20 +18,16 @@ class CoreFlow(SettingsMixin):
         Возвращает список результатов сценария.
         """
         try:
-            tasks = []
-            config = cls.get_config()
-            result = asyncio.run(cls._run(tasks, config))
+            result = asyncio.run(cls._run())
             return result
         except GenerationError:
             return []
 
     @classmethod
-    async def _run(cls, tasks: list, config: dict) -> list:
+    async def _run(cls) -> list:
         """
         Backend-функция входа в сценарий, которую нужно перегружать в дочерних функциях.
 
-        :param tasks: Список задач сценария.
-        :param config: Конфигурация сценария.
         :return: Список результатов сценария.
         """
 

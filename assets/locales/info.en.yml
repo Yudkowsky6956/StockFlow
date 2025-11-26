@@ -50,6 +50,12 @@ en:
       paraphrased_answer: "Paraphrased"
       prompts_selected: "{amount} lines was found in \"{filename}\""
       success: "Imported {amount} lines of type \"{type}\" in database \"{database}\""
+    organize_files:
+      message: "Select files to organize"
+      files_selected: "Number of files selected: {amount}"
+      moved_file: "File '{filename}' moved to '{folder}'"
+      final: "Files successfully organized: {amount} files into {folders} folders"
+      no_files: "No files were selected"
     mark_files_as_done:
       files_found: "Found {amount} files that match format \"MODULE_HASH.jpg\" or \"MODULE_HASH.mp4\" (for example \"VEO_6cbdab32.jpg\")."
       marked_done: "{amount} lines marked as done in database \"{database}\"."
@@ -57,6 +63,7 @@ en:
       message: "Select photo to clear metadata"
       photos_selected: "{amount} photos were selected for cleaning metadata"
       final: "{amount} photo were successfully cleared."
+      no_files: "No files were selected"
   database:
     ensure_hash:
       rows_found: "Found {amount} rows for hash creating."
@@ -65,7 +72,7 @@ en:
       done: "Hash creation finished."
     imported_prompts: "Imported {amount} prompts."
   flows:
-    generate_metadata:
-      progress: "Generating metadata"
-      unit: "photo"
-
+    folder_selected: "Folder selected: {folder}"
+    files_selected_in_folder: "Files selected in folder: {folder}"
+    file_selected: "File selected: {file}"
+    starting_flow: "Starting flow"

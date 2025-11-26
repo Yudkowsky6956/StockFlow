@@ -32,6 +32,7 @@ class Midjourney(MidjourneyModule):
     CONFIG_PARAMETERS = MidjourneyModule.CONFIG_PARAMETERS + ["flags"]
     agent_message = MIDJOURNEY_MESSAGE
     agent_response = MIDJOURNEY_RESPONSE
+    output_amount = 4
 
 class Nano(NanoModule):
     agent_message = NANO_MESSAGE

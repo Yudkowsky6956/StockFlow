@@ -25,10 +25,14 @@ def formatter(record):
     module_color = record["extra"].get("module_color", "#FFFFFF")
     name = record["extra"].get("name", "")
     name_color = get_color_hash(name)
+    # second_module_name = record["extra"].get("second_module_name", "")
+    # second_module_color = record["extra"].get("second_module_color", "#FFFFFF")
 
     extras = []
     if module_name:
         extras.append(f"<bold><fg {module_color}>{module_name:<11}</fg {module_color}></bold>")
+    # if second_module_name:
+    #     extras.append(f"<bold><fg {second_module_color}>{second_module_name:<11}</fg {second_module_color}></bold>")
     if name:
         extras.append(f"<fg {name_color}>{name:<8}</fg {name_color}>")
 

@@ -10,7 +10,11 @@ def clear_metadata():
     photos_selected = t("info.scripts.clear_metadata.photos_selected")
     success = t("info.scripts.clear_metadata.final")
 
-    photos = select_photos(title=message)
+    try:
+        photos = select_photos(title=message)
+    except RuntimeError:
+        logger.info(t("info.scripts.clear_metadata.no_files"))
+        return
     logger.info(photos_selected, amount=len(photos))
 
     for photo in photos:

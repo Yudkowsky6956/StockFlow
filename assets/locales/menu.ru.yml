@@ -29,6 +29,10 @@ ru:
     show_sales_infographics:
       name: "Показать графики продаж"
       choice: "Показать графики продаж"
+
+    organize_files:
+      name: "Файлы по папкам"
+      choice: "Файлы по папкам"
   settings:
     name: "Настройки"
     choice: "⚙️ Настройки"

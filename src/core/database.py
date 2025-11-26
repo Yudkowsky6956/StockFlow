@@ -20,7 +20,10 @@ class Database:
         {"name": "VEO", "type": "INTEGER"},
         {"name": "RUNWAY", "type": "INTEGER"},
         {"name": "SORA", "type": "INTEGER"},
-        {"name": "MIDJOURNEY", "type": "INTEGER"}
+        {"name": "MINIMAX", "type": "INTEGER"},
+        {"name": "LUMA", "type": "INTEGER"},
+        {"name": "MIDJOURNEY", "type": "INTEGER"},
+        {"name": "NANO", "type": "INTEGER"}
     ]
 
     def __init__(self, name: str):
@@ -28,6 +31,7 @@ class Database:
         self.path = DATABASE_FOLDER / f"{name}.db"
         self.logger = logger.bind(module=self.name)
         self.logger.debug("DB Initialized.")
+
 
     def __enter__(self):
         """Запускает соединение с БД"""
@@ -37,7 +41,7 @@ class Database:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Останавливает соединение с ДБ"""
+        """Останавливает соединение с БД"""
         self.connection.close()
 
     def commit(self):
@@ -49,35 +53,62 @@ class Database:
         existing_columns = [row[1] for row in self.cursor.fetchall()]
         return existing_columns
 
-    def get(self, amount: int = None, modules: list[str] = None) -> list[PromptRecord]:
+    def get(self, amount: int = None, modules: list[str] | str = None) -> dict:
         """
-        Возвращает список PromptRecord:
-        - Не завершённые (по указанным модулям)
-        - Без ошибки
-        - Можно ограничить количеством amount
+        Возвращает словарь вида:
+        {
+            "VEO": [PromptRecord, ...],
+            "SORA": [...],
+            ...
+        }
+
+        Для каждого модуля выбирает amount строк, где:
+            - alt_prompt НЕ NULL и не пустой
+            - error != 1
+            - module != 1
         """
-        self.cursor.execute(f'SELECT prompt, alt_prompt, hash FROM "{self.name}"')
-        rows = self.cursor.fetchall()
 
-        result = []
-        for prompt, alt_prompt, _hash in rows:
-            if alt_prompt is None:
-                continue  # alt_prompt обязателен
+        # Если передали одну строку — превращаем в список
+        if isinstance(modules, str):
+            modules = [modules]
 
-            # Пропускаем строки с ошибкой
-            if _hash and self.is_error(_hash):
-                continue
+        if modules is None:
+            modules = []
 
-            # Пропускаем строки, которые завершены во всех указанных модулях
-            if modules and _hash:
-                if all(self.is_marked(_hash, m) for m in modules):
-                    continue
+        # Проверка что modules — список строк
+        if not isinstance(modules, list) or not all(isinstance(m, str) for m in modules):
+            raise ValueError("Modules должен быть строкой или списком строк")
 
-            result.append(PromptRecord(prompt, alt_prompt, _hash))
-            if amount and len(result) >= amount:
-                break
+        result = {}
 
-        self.logger.info(t("info.database.imported_prompts"), amount=len(result))
+        for module in modules:
+            # Проверяем, что колонка существует
+            if module.upper() not in (col["name"] for col in self.REQUIRED_COLUMNS):
+                raise ValueError(f"Неизвестный модуль: {module}")
+
+            query = f"""
+                SELECT prompt, alt_prompt, hash
+                FROM "{self.name}"
+                WHERE alt_prompt IS NOT NULL
+                  AND alt_prompt != ''
+                  AND error != 1
+                  AND "{module}" != 1
+                ORDER BY ROWID DESC
+            """
+
+            params = []
+            if amount is not None:
+                query += " LIMIT ?"
+                params.append(amount)
+
+            self.cursor.execute(query, params)
+            rows = self.cursor.fetchall()
+
+            result[module] = [
+                PromptRecord(prompt=row[0], alt_prompt=row[1], hash=row[2])
+                for row in rows
+            ]
+
         return result
 
     def get_not_paraphrased(self, amount: int = None) -> list[PromptRecord]:
@@ -97,10 +128,17 @@ class Database:
         return result
 
     def _ensure_column_exists(self, column: dict):
-        """Проверяет, что колонка существует"""
+        """Проверяет, что колонка существует и заменяет NULL на 0 для INTEGER"""
         if column["name"] not in self.existing_columns:
             self.logger.debug(f'Column with name "{column["name"]}" not exists, creating it…')
             self.cursor.execute(f'ALTER TABLE "{self.name}" ADD COLUMN {column["name"]} {column["type"]}')
+            self.commit()
+
+        if column["type"].upper() in ("INTEGER", "INT", "BIGINT", "SMALLINT"):
+            self.logger.debug(f'Filling NULLs with 0 in column "{column["name"]}"…')
+            self.cursor.execute(
+                f'UPDATE "{self.name}" SET "{column["name"]}" = 0 WHERE "{column["name"]}" IS NULL'
+            )
             self.commit()
 
     def _ensure_table_exists(self):

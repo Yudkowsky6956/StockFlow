@@ -168,9 +168,10 @@ class TelegramBot:
         logger.debug(f"Clicking button with text: \"{text}\".")
         await message.click(text)
 
-    async def download(self, message: Message, path: Path, logger=default_logger) -> Path:
+    async def download(self, message: Message, path: Path, logger=default_logger) -> Path | None:
         """Downloads file from Message and returns Path"""
         if message.media:
             logger.debug(f"Downloading media from message with {self._compose_log(message.text or message.caption, None)}.")
             return Path(await message.download(str(path), in_memory=False))
-        raise RuntimeError(f"Provided message with {self._compose_log(message.text or message.caption, None)} hasn't media to download.")
+        logger.error(f"Provided message with {self._compose_log(message.text or message.caption, None)} hasn't media to download.")
+        return None

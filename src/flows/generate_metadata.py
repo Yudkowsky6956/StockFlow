@@ -20,8 +20,7 @@ class GenerateMetadata(CoreFlow):
 
 
     @classmethod
-    async def _task(cls, name, image_file: ImageFile, logger, database, gpt_template, double):
-        gpt = get_modules_objects("GPT")
+    async def _task(cls, name, image_file: ImageFile, logger, database, gpt_template, double, gpt):
         answer_dict = await gpt.run(
             name=name,
             logger=logger,
@@ -41,24 +40,30 @@ class GenerateMetadata(CoreFlow):
         return image_file
 
     @classmethod
-    async def _run(cls, tasks: list, config: dict) -> list:
-        photos = select_photos()
-        gpt_template = config.get("gpt_template")
+    async def _run(cls) -> list:
+        default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
 
+        photos = select_photos()
         double = ask_double()
 
-        database_name = config.get("database")
-        with Database(database_name) as db:
-            gpt = get_modules_objects("GPT")
-            photos = [ImageFile(photo) for photo in photos]
+        flow_config = cls.get_config()
+        gpt_template = flow_config.get("gpt_template")
+        database_name = flow_config.get("database")
+        unit = t(f"config_flows.{cls.__name__}.progress_unit")
 
-            bot = SyntxBot()
-            async with bot.client:
+        tasks = []
+        gpt = get_modules_objects("GPT")
+        module_name = gpt.get_name()
+        module_color = gpt.get_color()
+        photos = [ImageFile(photo) for photo in photos]
+
+        with Database(database_name) as db:
+            async with SyntxBot().client:
                 for photo in photos:
                     if not (photo.title or photo.description or photo.keywords):
                         name = photo.path.stem
-                        config = gpt.get_config()
-                        logger = default_logger.bind(name=name, module_name=config["name"], module_color=config["color"])
+                        logger = default_logger.bind(name=name, module_name=module_name, module_color=module_color)
+
                         tasks.append(
                             asyncio.create_task(
                                 cls._task(
@@ -68,8 +73,13 @@ class GenerateMetadata(CoreFlow):
                                     image_file=photo,
                                     gpt_template=gpt_template,
                                     double=double,
+                                    gpt=gpt
                                 )
                             )
                         )
-                results = await tqdm_asyncio.gather(*tasks, desc=t(f"config_flows.{cls.__name__}.progress_bar"), unit=t(f"config_flows.{cls.__name__}.progress_unit"))
-                return results
+
+                return await tqdm_asyncio.gather(
+                    *tasks,
+                    desc=f"{module_name:<11}",
+                    unit=unit
+                )

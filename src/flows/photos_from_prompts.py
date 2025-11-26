@@ -16,25 +16,38 @@ class GeneratePhotosFromPrompts(CoreFlow):
 
 
     @classmethod
-    async def _run(cls, tasks: list, config: dict) -> list:
+    async def _run(cls) -> list:
+        default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
+
         destination = select_photo_folder()
-        amount = config.get("gen_amount")
-        modules_names = config.get("photo_modules")
-        modules_objects = get_modules_objects(modules_names)
 
-        database_name = config.get("database")
+        flow_config = cls.get_config()
+        amount = flow_config.get("gen_amount")
+        modules_names = flow_config.get("photo_modules")
+        database_name = flow_config.get("database")
+
+        unit = t(f"config_flows.{cls.__name__}.progress_unit")
+
+        modules = get_modules_objects(modules_names)
+        tasks = []
+        results = []
+
         with Database(database_name) as db:
-            rows = db.get(amount=amount, modules=modules_names)
+            all_rows = db.get(amount=amount, modules=modules_names)
 
-            bot = SyntxBot()
-            async with bot.client:
-                for row in rows:
-                    name = row.hash
-                    paraphrased = row.alt_prompt
-                    for module in modules_objects:
-                        config = module.get_config()
-                        logger = default_logger.bind(name=name, module_name=config["name"], module_color=config["color"])
-                        tasks.append(
+            async with SyntxBot().client:
+                for module in modules:
+                    module_name = module.get_name()
+                    module_color = module.get_color()
+                    module_rows = all_rows[module_name]
+                    module_tasks = []
+
+                    for row in module_rows:
+                        name = row.hash
+                        paraphrased = row.alt_prompt
+                        logger = default_logger.bind(name=name, module_name=module_name, module_color=module_color)
+
+                        module_tasks.append(
                             asyncio.create_task(
                                 module.run(
                                     name=name,
@@ -45,6 +58,20 @@ class GeneratePhotosFromPrompts(CoreFlow):
                                 )
                             )
                         )
-                results = await tqdm_asyncio.gather(*tasks, desc=t(f"config_flows.{cls.__name__}.progress_bar"), unit=t(f"config_flows.{cls.__name__}.progress_unit"))
-                results = [x for row in results for x in row]
+
+                    tasks.append(
+                        asyncio.create_task(
+                            tqdm_asyncio.gather(
+                                *module_tasks,
+                                desc=f"{module_name:<11}",
+                                unit=unit
+                            )
+                        )
+                    )
+
+                nested_results = await asyncio.gather(*tasks)
+                for result in nested_results:
+                    if not isinstance(result, list):
+                        result = [result]
+                    results.extend(result)
                 return results

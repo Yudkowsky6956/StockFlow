@@ -16,8 +16,7 @@ class ParaphrasePrompts(CoreFlow):
 
 
     @classmethod
-    async def _task(cls, name, logger, database, pre_template, post_template, prompt):
-        gpt = get_modules_objects("GPT")
+    async def _task(cls, name, logger, database, pre_template, post_template, prompt, gpt):
         answer_dict = await gpt.run(
             name=name,
             logger=logger,
@@ -34,24 +33,36 @@ class ParaphrasePrompts(CoreFlow):
         return paraphrased_prompt
 
     @classmethod
-    async def _run(cls, tasks: list, config: dict) -> list:
-        pre_template = config.get("pre_template")
-        post_template = config.get("post_template")
+    async def _run(cls) -> list:
+        default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
 
-        database_name = config.get("database")
+        flow_config = cls.get_config()
+        pre_template = flow_config.get("pre_template")
+        post_template = flow_config.get("post_template")
+        database_name = flow_config.get("database")
+        unit = t(f"config_flows.{cls.__name__}.progress_unit")
+
+        tasks = []
+
+        gpt = get_modules_objects("GPT")
+        module_name = gpt.get_name()
+        module_color = gpt.get_color()
+
         with Database(database_name) as db:
-            gpt = get_modules_objects("GPT")
             rows = db.get_not_paraphrased()
 
-            bot = SyntxBot()
-            async with bot.client:
+            async with SyntxBot().client:
                 for row in rows:
                     prompt = row.prompt
                     name = row.hash
                     paraphrased = row.alt_prompt
+                    logger = default_logger.bind(
+                        name=name,
+                        module_name=module_name,
+                        module_color=module_color
+                    )
+
                     if not paraphrased:
-                        config = gpt.get_config()
-                        logger = default_logger.bind(name=name, module_name=config["name"], module_color=config["color"])
                         tasks.append(
                             asyncio.create_task(
                                 cls._task(
@@ -61,8 +72,13 @@ class ParaphrasePrompts(CoreFlow):
                                     prompt=prompt,
                                     pre_template=pre_template,
                                     post_template=post_template,
+                                    gpt=gpt
                                 )
                             )
                         )
-                results = await tqdm_asyncio.gather(*tasks, desc=t(f"config_flows.{cls.__name__}.progress_bar"), unit=t(f"config_flows.{cls.__name__}.progress_unit"))
-                return results
+
+                return await tqdm_asyncio.gather(
+                    *tasks,
+                    desc=f"{module_name:<11}",
+                    unit=unit
+                )

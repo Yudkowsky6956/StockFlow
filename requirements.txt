@@ -3,6 +3,8 @@ pyrogram
 tgcrypto-pyrofork
 playwright
 
+###   playwright install
+
 # Analyze
 plotly
 pandas

@@ -29,6 +29,10 @@ en:
     show_sales_infographics:
       name: "Show sales infographics"
       choice: "Show sales infographics"
+
+    organize_files:
+      name: "Files to folders"
+      choice: "Files to folders"
   settings:
     name: "Settings"
     choice: "⚙️ Settings"

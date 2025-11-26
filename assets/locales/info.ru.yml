@@ -2,6 +2,7 @@
 ru:
   design:
     generating: "Генерация фото…"
+    generation_amount_end: "Генерация {amount} фото завершена! ✔️"
     generation_end: "Генерация фото завершена! ✔️"
   video:
     loading_photos: "Загрузка {amount} фото…"
@@ -49,6 +50,12 @@ ru:
       paraphrased_answer: "Перефразированные"
       prompts_selected: "{amount} строк было найдено в файле \"{filename}\""
       success: "Импортировано {amount} строк типа \"{type}\" в колонки базы \"{database}\""
+    organize_files:
+      message: "Выберите файлы для организации"
+      files_selected: "Выбрано файлов: {amount}"
+      moved_file: "Файл '{filename}' перемещён в '{folder}'"
+      final: "Файлы успешно организованы: {amount} файлов в {folders} папках"
+      no_files: "Файлы не выбраны"
     mark_files_as_done:
       files_found: "Найдено {amount} файлов, подходящих под формат \"MODULE_HASH.jpg\" или \"MODULE_HASH.mp4\" (например \"VEO_6cbdab32.jpg\")."
       marked_done: "Помечено как сделанные {amount} записей в базе \"{database}\"."
@@ -56,6 +63,7 @@ ru:
       message: "Выберите фото для очистки метаданных"
       photos_selected: "Было выбрано {amount} фото для очистки метаданных."
       final: "Успешно очищено {amount} фото."
+      no_files: "Файлы не выбраны"
   database:
     ensure_hash:
       rows_found: "Найдено {amount} строк в которых нужно создать хэш."
@@ -64,6 +72,7 @@ ru:
       done: "Создание хэшей завершено."
     imported_prompts: "Импортировано {amount} промптов."
   flows:
-    generate_metadata:
-      progress: "Генерация метаданных"
-      unit: "фото"
+    folder_selected: "Выбрана папка: {folder}"
+    files_selected_in_folder: "Файлы выбраны в папке: {folder}"
+    file_selected: "Файл выбран: {file}"
+    starting_flow: "Запускаю сценарий"
