@@ -44,6 +44,7 @@ ru:
       video_folder: "Выберите папку для сохранения видео"
       photo_folder: "Выберите папку для сохранения фото"
   scripts:
+    starting_script: "Запускаем скрипт"
     import_prompts:
       question: "Импортировать как оригинальные промпты (prompt) или как перефразированные промпты (alt_prompt)?"
       original_answer: "Оригинальные"
@@ -64,6 +65,34 @@ ru:
       photos_selected: "Было выбрано {amount} фото для очистки метаданных."
       final: "Успешно очищено {amount} фото."
       no_files: "Файлы не выбраны"
+    parse_sales_data:
+      name: "Спарсить данные продаж"
+      select_file: "Выберите CSV файл…"
+      cache_error: "⚠ Ошибка чтения кэша — создаю новый."
+      cache_saved: "💾 Кэш обновлён: {file}"
+      cache_hit:  "[{media_id:<10}] — ☑️"
+      fetched:    "[{media_id:<10}] — ✅ "
+      fetch_error: "[{media_id:<10}] — ❌: {error}"
+      timeout:    "[{media_id:<10}] — ⏳ : {url}"
+      merged:     "📄 Найден существующий parsed-файл — пропускаю уже обработанные записи."
+      resume:     "🔄 Продолжаю обработку пропущенных..."
+      progress:   "Парсинг продаж"
+      done:       "🎉 Готово! Файл сохранён: {file}"
+    show_sales_data:
+      name: "Показать данные продаж"
+      photos: "Фото"
+      videos: "Видео"
+      vectors: "Векторы"
+      illustrations: "Иллюстрации"
+      ai: " AI"
+      not_ai: ""
+      by_media_type: "Доход по типу медиа"
+      sale_type: "Тип"
+      sale_income: "Доход"
+      sale_percent: "Доля"
+      sale_amount: "Продаж"
+      media_id: "Медиа ID"
+      income_by: "Доход от"
   database:
     ensure_hash:
       rows_found: "Найдено {amount} строк в которых нужно создать хэш."

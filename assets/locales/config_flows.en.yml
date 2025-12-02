@@ -20,6 +20,11 @@ en:
       name: "Upscale"
       message: "Upscale or not"
       description: "Should program upscale images?"
+    one_video_per_photo:
+      name: "One Video per Photo"
+      message: "One video per photo"
+      description: "Whether to generate only one video from each photo. If set to 'No', all video modules will generate a video from each photo. If set to 'Yes', only one video module will be used per photo."
+
 
   GenerateVideosFromPrompts:
     name: "Videos from prompts"

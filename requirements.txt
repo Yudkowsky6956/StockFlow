@@ -2,12 +2,12 @@
 pyrogram
 tgcrypto-pyrofork
 playwright
-
 ###   playwright install
 
 # Analyze
 plotly
 pandas
+dash
 
 # Utils
 python-i18n[YAML]

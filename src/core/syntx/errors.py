@@ -133,6 +133,12 @@ VIDEO_TOO_LONG = HandlerError(
 )
 
 
+# GLOBAL
+GLOBAL_BANNED_ERROR = HandlerError(
+    message = "Вы заблокированы в нашем чат-боте из-за нарушений правил.",
+    log="error.handlers.global_banned_error",
+    fatal=True
+)
 
 
 AFTER_REQUEST_ERROR = [

@@ -4,13 +4,15 @@ import asyncio
 from loguru import logger as default_logger
 from pyrogram.filters import AndFilter
 from pyrogram.types import Message
+from pyrogram.handlers import MessageHandler
+from pyrogram import filters
 from i18n import t
 
 from src.modules.core_module import SyntxModule
 from src.core.pyrogram.session import Session
 from src.core.pyrogram.bot import TelegramBot
 from src.core.pyrogram.filters import contains, is_replying_to, message_exists
-from .errors import ALL_ERRORS, HandlerError
+from .errors import ALL_ERRORS, HandlerError, GLOBAL_BANNED_ERROR
 from .exceptions import GenerationError
 
 
@@ -23,6 +25,15 @@ class SyntxBot(TelegramBot):
     def __init__(self, session: Session = None, phone_number: str = None):
         super().__init__(session, phone_number)
         SyntxModule.set_bot(self)
+
+        # Добавляем глобальный хэндлер выключения.
+        def global_banned_handler():
+            error = GLOBAL_BANNED_ERROR
+            default_logger.critical(t(error.log))
+            raise GenerationError(error.message, log=error.log, delay=error.delay, fatal=error.fatal, mark=error.mark, lock=error.lock)
+
+        handler = MessageHandler(global_banned_handler, filters.chat(self.id) & contains(GLOBAL_BANNED_ERROR.message))
+        self.client.add_handler(handler)
 
     async def wait_for(self, flt: AndFilter, message: Optional[Message] = None, send: bool = True, edit: bool = True, reply: bool = False, logger=default_logger, future=None, request_message=None, photo=None, button_map=None, wait=True) -> Message:
         local_handlers = []

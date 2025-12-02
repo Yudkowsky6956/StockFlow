@@ -1,0 +1,30 @@
+ru:
+  default:
+
+  MarkFilesAsDone:
+    name: "Отметить файлы как выполненные"
+    choice: "Отметить файлы как выполненные"
+
+  ImportPrompts:
+    name: "Импортировать промпты"
+    choice: "Импортировать промпты"
+
+  ClearMetadata:
+    name: "Очистить метаданные"
+    choice: "Очистить метаданные"
+
+  OrganizeFiles:
+    name: "Файлы по папкам"
+    choice: "Файлы по папкам"
+
+  ParseSalesData:
+    name: "Спарсить данные продаж"
+    choice: "Спарсить данные продаж"
+    timeout:
+      name: "Таймаут"
+      message: "Введите кол-во секунд до таймаута"
+      description: "Через какое время запрос к Adobe Stock будет считаться истёкшим."
+
+  ShowSalesData:
+    name: "Показать графики продаж"
+    choice: "Показать графики продаж"

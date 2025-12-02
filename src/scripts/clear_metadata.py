@@ -1,23 +1,29 @@
-from loguru import logger
+from loguru import logger as default_logger
 from i18n import t
 
 from src.core.image_file import ImageFile
 from src.interface.file_dialog import select_photos
+from .core_script import FilesScripts
 
 
-def clear_metadata():
-    message = t("info.scripts.clear_metadata.message")
-    photos_selected = t("info.scripts.clear_metadata.photos_selected")
-    success = t("info.scripts.clear_metadata.final")
+class ClearMetadata(FilesScripts):
+    message_locale = "info.scripts.clear_metadata.message"
+    photos_selected_locale = "info.scripts.clear_metadata.photos_selected"
+    success_locale = "info.scripts.clear_metadata.final"
+    no_photos_locale = "info.scripts.clear_metadata.no_files"
 
-    try:
-        photos = select_photos(title=message)
-    except RuntimeError:
-        logger.info(t("info.scripts.clear_metadata.no_files"))
-        return
-    logger.info(photos_selected, amount=len(photos))
+    @classmethod
+    async def _run(cls):
+        logger = default_logger.bind(module_name=cls.__name__)
 
-    for photo in photos:
-        ImageFile(photo).clear()
+        try:
+            photos = select_photos(title=t(cls.message_locale))
+        except RuntimeError:
+            logger.info(t(cls.no_photos_locale))
+            return
+        logger.info(t(cls.photos_selected_locale), amount=len(photos))
 
-    logger.success(success, amount=len(photos))
+        for photo in photos:
+            ImageFile(photo).clear()
+
+        logger.success(t(cls.success_locale), amount=len(photos))

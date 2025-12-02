@@ -72,8 +72,6 @@ class GPTModule(CategoryModule):
         soup = await GPTModule.get_soup(url)
         questions = soup.find_all("div", class_="message userquestion")[-25:]
 
-        found_message_later = False
-
         for q in questions:
             for btn in q.find_all("button", class_="copy-message-button"):
                 btn.decompose()
@@ -91,7 +89,6 @@ class GPTModule(CategoryModule):
                     continue
 
                 if after_time and msg_dt < after_time:
-                    found_message_later = True
                     continue
 
             answer_block = q.find_next("div", class_="message answer")
@@ -109,44 +106,6 @@ class GPTModule(CategoryModule):
             t("error.wrong_conversation_id"),
             fatal=True
         )
-    #
-    # @classmethod
-    # async def request_new_conversation_url(cls) -> str:
-    #     prompt_message = await cls.bot().send(text=str(cls.get_time()))
-    #     message = await cls.bot().wait_for(
-    #         flt=has_inline_button(GPT_VIEW_FULL_DIALOG),
-    #         message=prompt_message,
-    #         reply=True
-    #     )
-    #     return await cls.get_button_url(message, GPT_VIEW_FULL_DIALOG)
-    #
-    # @classmethod
-    # async def check_conversation_url(cls):
-    #     url = get_conversation_url()
-    #     if not await cls._check_conversation_url(url):
-    #         logger.warning(t("info.gpt.invalid_conversation_url"))
-    #         url = await cls.request_new_conversation_url()
-    #         set_conversation_url(url)
-    #
-    # @classmethod
-    # async def _check_conversation_url(cls, url: str):
-    #     if not url:
-    #         return False
-    #     if not validators.url(url):
-    #         return False
-    #     prompt_message = await cls.bot().send(text=cls.get_time())
-    #     after_time = cls.get_time()
-    #     await cls.bot().wait_for(
-    #         flt=has_inline_button(GPT_VIEW_FULL_DIALOG),
-    #         message=prompt_message,
-    #         reply=True
-    #     )
-    #     try:
-    #         cls.get_answer_text(prompt_message, after_time)
-    #     except GenerationError:
-    #         return False
-    #     return True
-
 
 
 

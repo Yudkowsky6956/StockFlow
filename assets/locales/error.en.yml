@@ -13,6 +13,7 @@ en:
     on_fixing: "проходит плановое обслуживание."
     cant_start_generation: "Model can't start generating this prompt."
     video_too_long: "Processing error. The video length is too long. Maximum 480p/720p = 10 / 1080p = 5 seconds."
+    global_banned: "Global ban in Syntx!"
   interface:
     select:
       folder_not_selected: "Folder wasn't selected."

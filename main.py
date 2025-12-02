@@ -1,5 +1,4 @@
 import argparse
-import pyrogram
 
 from src.core.logger import setup_logger
 from src.interface.main_menu import MainMenu
@@ -30,4 +29,5 @@ if __name__ == '__main__':
     setup_logger()
 
     main()
+
 

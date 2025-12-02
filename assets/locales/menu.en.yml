@@ -10,29 +10,6 @@ en:
   scripts:
     name: "Scripts"
     choice: "📜 Scripts"
-    import_prompts:
-      name: "Import prompts"
-      choice: "Import prompts"
-
-    clear_metadata:
-      name: "Clear metadata"
-      choice: "Clear metadata"
-
-    mark_files_as_done:
-      name: "Mark files as done"
-      choice: "Mark files as done"
-
-    parse_sales_data:
-      name: "Parse sales data"
-      choice: "Parse sales data"
-
-    show_sales_infographics:
-      name: "Show sales infographics"
-      choice: "Show sales infographics"
-
-    organize_files:
-      name: "Files to folders"
-      choice: "Files to folders"
   settings:
     name: "Settings"
     choice: "⚙️ Settings"

@@ -1,11 +1,11 @@
 from .core_menu import Menu, ConfigurableMenu
 from ..modules import MODULES_LIST
 from ..flows import FLOWS_LIST
+from ..scripts import SCRIPTS_LIST
 
 
 class GlobalSettings(ConfigurableMenu):
     name = "global"
-
 
 class ModulesSettings(ConfigurableMenu):
     name = "modules"
@@ -15,7 +15,11 @@ class FlowSettings(ConfigurableMenu):
     name = "flows"
     choices = {flow: flow.run_menu for flow in FLOWS_LIST}
 
-SETTINGS_LIST = [FlowSettings, ModulesSettings, GlobalSettings]
+class ScriptsSettings(ConfigurableMenu):
+    name = "scripts"
+    choices = {script: script.run_menu for script in SCRIPTS_LIST}
+
+SETTINGS_LIST = [FlowSettings, ModulesSettings, ScriptsSettings, GlobalSettings]
 
 class SettingsMenu(Menu):
     name = "settings"

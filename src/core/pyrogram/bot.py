@@ -8,8 +8,11 @@ from src.core.pyrogram.session import Session
 from pyrogram.enums import ParseMode
 from pyrogram.types import ChatEventFilter, InputMediaPhoto, Message
 
+import random
+
 from src.utils.sentances import wrap_by_words
 from .filters import is_replying_to, button_map_filter
+
 
 
 class TelegramBot:
@@ -108,7 +111,10 @@ class TelegramBot:
 
     async def send_text(self, text: str, parse_mode=ParseMode.DISABLED, logger=default_logger) -> Message:
         """Sends text and returns message"""
-        logger.debug(f"Sending message with {self._compose_log(text, None)}.")
+        # TODO: Перенести задержку в глобальный конфиг.
+        delay = max(min(random.gauss(1.5, 0.4), 4), 0.1)
+        logger.debug(f"Sending message with {self._compose_log(text, None)} and delay = \"{delay}\".")
+        await asyncio.sleep(delay)
         return await self.client.send_message(self.id, text, parse_mode=parse_mode)
 
     @classmethod

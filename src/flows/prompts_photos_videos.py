@@ -11,7 +11,7 @@ from .core_flow import CoreFlow
 
 
 class GeneratePromptsPhotosVideos(CoreFlow):
-    CONFIG_PARAMETERS = ["database", "gen_amount", "upscale", "photo_modules", "video_modules"]
+    CONFIG_PARAMETERS = ["database", "gen_amount", "upscale", "photo_modules", "video_modules", "one_video_per_photo"]
 
     @classmethod
     async def _run(cls) -> tuple[list, list]:
@@ -54,7 +54,11 @@ class GeneratePromptsPhotosVideos(CoreFlow):
                 # --- callback ---
 
                 def make_photo_done(bar, photo_module, paraphrased):
+                    # индекс для кругового выбора видео модуля
+                    video_index = 0
+
                     def callback(task: asyncio.Task):
+                        nonlocal video_index
                         try:
                             photos = task.result()
                             if not isinstance(photos, list):
@@ -66,20 +70,24 @@ class GeneratePromptsPhotosVideos(CoreFlow):
 
                         missing_photos = photo_module.output_amount - len(photos)
                         if missing_photos > 0:
-                            for vm in video_modules:
-                                vbar = video_bars[photo_module][vm]
-                                vbar.update(missing_photos)
+                            # если фото не хватило, обновляем все бары видео
+                            if not cls.get_config().get("one_video_per_photo"):
+                                for vm in video_modules:
+                                    vbar = video_bars[photo_module][vm]
+                                    vbar.update(missing_photos)
 
-                        # сразу создаём видео задачи для каждого фото
+                        # --- создаём видео задачи ---
                         for photo in photos:
-                            for vm in video_modules:
+                            if cls.get_config().get("one_video_per_photo"):
+                                # берем один видео-модуль по кругу
+                                vm = video_modules[video_index % len(video_modules)]
                                 vbar = video_bars[photo_module][vm]
                                 video_logger = default_logger.bind(
                                     name=photo.stem,
                                     module_name=vm.get_name(),
                                     module_color=vm.get_color(),
                                 )
-                                vtask = loop.create_task(
+                                vtask = asyncio.get_event_loop().create_task(
                                     vm.run(
                                         name=photo.stem,
                                         prompt=paraphrased,
@@ -92,6 +100,30 @@ class GeneratePromptsPhotosVideos(CoreFlow):
                                 )
                                 vtask.add_done_callback(lambda t, b=vbar: b.update())
                                 all_tasks.add(vtask)
+                                video_index += 1  # следующий модуль
+                            else:
+                                # старая логика: все видео модули
+                                for vm in video_modules:
+                                    vbar = video_bars[photo_module][vm]
+                                    video_logger = default_logger.bind(
+                                        name=photo.stem,
+                                        module_name=vm.get_name(),
+                                        module_color=vm.get_color(),
+                                    )
+                                    vtask = asyncio.get_event_loop().create_task(
+                                        vm.run(
+                                            name=photo.stem,
+                                            prompt=paraphrased,
+                                            photo=photo,
+                                            logger=video_logger,
+                                            database=db,
+                                            mark=False,
+                                            destination=destination,
+                                        )
+                                    )
+                                    vtask.add_done_callback(lambda t, b=vbar: b.update())
+                                    all_tasks.add(vtask)
+
                     return callback
 
                 # --- создаём фото задачи ---

@@ -36,7 +36,7 @@ def select_file(title: str = "info.interface.select.file", **kwargs):
     logger.info(f"{title}…")
     file = filedialog.askopenfilename(title=t(title), parent=_get_root(), **kwargs)
     if file:
-        logger.info(t("info.flows.file_selected"), folder=Path(file).resolve().parent)
+        logger.info(t("info.flows.file_selected"), file=Path(file).resolve())
         return Path(file)
     raise RuntimeError(t("error.interface.select.file_not_selected"))
 

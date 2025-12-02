@@ -1,28 +1,36 @@
-from .core_menu import Menu
+from .core_menu import ConfigurableMenu, Menu
 from src.scripts import DB_SCRIPTS_LIST, FILES_SCRIPTS_LIST, INFOGRAPHICS_SCRIPTS_LIST
+from i18n import t
 
 
-class ScriptsSubMenu(Menu):
+class ScriptsSubMenu(ConfigurableMenu):
+    name = "scripts"
+    menu_name = "menu_name"
+
     @classmethod
     def get_item_choice_locale(cls, item):
-        return f"menu.scripts.{item.__name__}.choice"
+        return f"config_{cls.name}.{item.__name__}.choice"
 
     @classmethod
     def get_item_name_locale(cls, item):
-        return f"menu.scripts.{item.__name__}.name"
+        return f"config_{cls.name}.{item.__name__}.name"
+
+    @classmethod
+    def get_name(cls):
+        return t(f"menu.{cls.menu_name}.name")
 
 
 class ScriptsInfographics(ScriptsSubMenu):
-    name = "infographics_scripts"
-    choices = {script: None for script in INFOGRAPHICS_SCRIPTS_LIST}
+    menu_name = "infographics_scripts"
+    choices = {script: script.run for script in INFOGRAPHICS_SCRIPTS_LIST}
 
 class ScriptsFiles(ScriptsSubMenu):
-    name = "files_scripts"
-    choices = {script: None for script in FILES_SCRIPTS_LIST}
+    menu_name = "files_scripts"
+    choices = {script: script.run for script in FILES_SCRIPTS_LIST}
 
 class ScriptsDatabaseMenu(ScriptsSubMenu):
-    name = "db_scripts"
-    choices = {script: None for script in DB_SCRIPTS_LIST}
+    menu_name = "db_scripts"
+    choices = {script: script.run for script in DB_SCRIPTS_LIST}
 
 
 SCRIPTS_LIST = [ScriptsDatabaseMenu, ScriptsFiles, ScriptsInfographics]
@@ -31,3 +39,7 @@ SCRIPTS_LIST = [ScriptsDatabaseMenu, ScriptsFiles, ScriptsInfographics]
 class ScriptsMenu(Menu):
     name = "scripts"
     choices = {menu: menu.run_menu for menu in SCRIPTS_LIST}
+
+    @classmethod
+    def get_item_choice_locale(cls, item):
+        return f"menu.{item.menu_name}.choice"

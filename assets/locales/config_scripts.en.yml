@@ -1,0 +1,30 @@
+en:
+  default:
+
+  MarkFilesAsDone:
+    name: "Mark files as done"
+    choice: "Mark files as done"
+
+  ImportPrompts:
+    name: "Import prompts"
+    choice: "Import prompts"
+
+  ClearMetadata:
+    name: "Clear metadata"
+    choice: "Clear metadata"
+
+  OrganizeFiles:
+    name: "Files to folders"
+    choice: "Files to folders"
+
+  ParseSalesData:
+    name: "Parse sales data"
+    choice: "Parse sales data"
+    timeout:
+      name: "Timeout"
+      message: "Enter the number of seconds until timeout"
+      description: "After that period of time will a request to Adobe Stock be considered expired."
+
+  ShowSalesData:
+    name: "Show sales data"
+    choice: "Show sales data"

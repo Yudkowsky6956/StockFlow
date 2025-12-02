@@ -44,6 +44,7 @@ en:
       video_folder: "Select video saving directory"
       photo_folder: "Select photo saving directory"
   scripts:
+    starting_script: "Starting script"
     import_prompts:
       question: "Should program import as original prompts (prompt) or as paraphrased prompts (alt_prompt)?"
       original_answer: "Original"
@@ -64,6 +65,34 @@ en:
       photos_selected: "{amount} photos were selected for cleaning metadata"
       final: "{amount} photo were successfully cleared."
       no_files: "No files were selected"
+    parse_sales_data:
+      name: "Parse sales data"
+      select_file: "Select a CSV file…"
+      cache_error: "⚠ Cache read error — creating a new one."
+      cache_saved: "💾 Cache updated: {file}"
+      cache_hit:  "[{media_id:<10}] — ☑️"
+      fetched:    "[{media_id:<10}] — ✅ "
+      fetch_error: "[{media_id:<10}] — ❌: {error}"
+      timeout:    "[{media_id:<10}] — ⏳ : {url}"
+      merged:     "📄 Existing parsed file found — already processed entries skipped."
+      resume:     "🔄 Resuming incomplete items..."
+      progress:   "Sales parsing in progress"
+      done:       "🎉 Completed! File saved to: {file}"
+    show_sales_data:
+      name: "Show sales data"
+      photos: "Photos"
+      videos: "Videos"
+      vectors: "Vectors"
+      illustrations: "Illustrations"
+      ai: " AI"
+      not_ai: ""
+      by_media_type: "Income by media type"
+      sale_type: "Type"
+      sale_income: "Income"
+      sale_percent: "Percent"
+      sale_amount: "Amount"
+      media_id: "Media ID"
+      income_by: "Income by"
   database:
     ensure_hash:
       rows_found: "Found {amount} rows for hash creating."

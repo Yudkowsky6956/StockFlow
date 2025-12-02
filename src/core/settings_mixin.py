@@ -26,6 +26,7 @@ class SettingsMixin:
         "timeout": ask_not_negative_integers,
         "batch_size": ask_not_negative_integers,
         "flags": ask_string,
+        "one_video_per_photo": ask_yes_no,
     }
 
     @classmethod
@@ -96,8 +97,8 @@ class SettingsMixin:
         sig = inspect.signature(ask_fn)
         kwargs = {
             "message": message,
-            "default": local_config.get(parameter),
             "long_instruction": description,
+            "default": local_config.get(parameter)
         }
         if "back" in sig.parameters:
             kwargs["back"] = True
