@@ -3,8 +3,7 @@ from InquirerPy.base import Choice
 from i18n import t
 
 from src.core.vars import DATABASE_FOLDER
-from src.modules import VIDEO_MODULES, PHOTO_MODULES
-
+from src.modules import PHOTO_MODULES, VIDEO_MODULES
 
 
 def ask_integer(message: str = "info.interface.ask.integer", **kwargs) -> int:
@@ -22,6 +21,15 @@ def ask_amount(message: str = "info.interface.ask.amount", **kwargs) -> int:
 def ask_generation_amount(message: str = "info.interface.ask.generations_amount", **kwargs):
     """Выбор кол-ва генераций."""
     return ask_amount(message=message, **kwargs)
+
+
+def ask_float(message: str = "info.interface.ask.float", **kwargs) -> float:
+    """Общая функция для выбора дробного числа."""
+    return float(inquirer.number(message=f"{t(message)}:", float_allowed=True, **kwargs).execute())
+
+def ask_not_negative_float(message: str = "info.interface.ask.not_negative_float", **kwargs) -> float:
+    """Общая функция для выбора не отрицательного дробного числа."""
+    return ask_float(message=message, min_allowed=0, validate=lambda x: float(x) >= 0, **kwargs)
 
 
 

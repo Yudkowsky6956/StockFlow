@@ -1,17 +1,18 @@
 import asyncio
-
-from tqdm.asyncio import tqdm_asyncio
-from loguru import logger as default_logger
-from i18n import t
-
 import traceback
+
+from i18n import t
+from loguru import logger as default_logger
+from tqdm.asyncio import tqdm_asyncio
+
 from src.core.database import Database
-from src.core.syntx import GenerationError, SyntxBot
+from src.core.global_config import get_global_config
+from src.core.logger import telegram_sink
+from src.core.stop_event import StopEvent
+from src.core.syntx import SyntxBot
 from src.interface.file_dialog import select_photos, select_video_folder
 from src.modules import get_modules_objects
 from .core_flow import CoreFlow
-from ..core.global_config import get_global_config
-from ..core.logger import telegram_sink
 
 
 class GenerateVideosFromPhotos(CoreFlow):
@@ -21,7 +22,7 @@ class GenerateVideosFromPhotos(CoreFlow):
     async def _run(cls) -> list:
         try:
             default_logger.success(f"{t('info.flows.starting_flow')}: {t(f'config_flows.{cls.__name__}.choice')}")
-            await cls._reset_modules()
+
 
             photos = select_photos()
             destination = select_video_folder()
@@ -34,6 +35,7 @@ class GenerateVideosFromPhotos(CoreFlow):
             unit = t(f"config_flows.{cls.__name__}.progress_unit")
 
             modules = get_modules_objects(modules_names)
+            await cls._reset_modules(modules)
             tasks = []
             results = []
 
@@ -99,20 +101,28 @@ class GenerateVideosFromPhotos(CoreFlow):
                             )
 
                     # ждём завершения всех задач
-                    nested_results = await asyncio.gather(*tasks)
-                    for result in nested_results:
-                        # для one_video_per_photo результат приходит как объект, а не список
-                        if one_video_per_photo:
-                            results.append(result)
-                        else:
-                            results.extend(result)
+                    async def _watch_for_stop(tasks):
+                        await StopEvent.event.wait()
+                        for task in tasks:
+                            task.cancel()
+                    stop_watcher = asyncio.create_task(_watch_for_stop(tasks))
 
-                    if get_global_config().get("notify_on_end"):
-                        telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
-                    return results
+                    try:
+                        nested_results = await asyncio.gather(*tasks)
+                        for result in nested_results:
+                            # для one_video_per_photo результат приходит как объект, а не список
+                            if one_video_per_photo:
+                                results.append(result)
+                            else:
+                                results.extend(result)
 
-        except GenerationError as e:
-            return []
+                        if get_global_config().get("notify_on_end"):
+                            telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
+                        return results
+                    except asyncio.CancelledError:
+                        pass
+                    finally:
+                        stop_watcher.cancel()
 
         except Exception as e:
             default_logger.critical(str(e))

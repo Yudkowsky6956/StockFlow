@@ -6,12 +6,13 @@ from loguru import logger as default_logger
 from tqdm import tqdm
 
 from src.core.database import Database
-from src.core.syntx import GenerationError, SyntxBot
+from src.core.global_config import get_global_config
+from src.core.logger import telegram_sink
+from src.core.stop_event import StopEvent
+from src.core.syntx import SyntxBot
 from src.interface.file_dialog import select_photo_folder
 from src.modules import get_modules_objects
 from .core_flow import CoreFlow
-from ..core.global_config import get_global_config
-from ..core.logger import telegram_sink
 
 
 class GeneratePromptsPhotosVideos(CoreFlow):
@@ -21,7 +22,6 @@ class GeneratePromptsPhotosVideos(CoreFlow):
     async def _run(cls) -> tuple[list, list]:
         try:
             default_logger.success(f"{t('info.flows.starting_flow')}: {t(f'config_flows.{cls.__name__}.choice')}")
-            await cls._reset_modules()
 
             destination = select_photo_folder()
             cfg = cls.get_config()
@@ -33,6 +33,7 @@ class GeneratePromptsPhotosVideos(CoreFlow):
 
             photo_modules = get_modules_objects(photo_modules_names)
             video_modules = get_modules_objects(video_modules_names)
+            await cls._reset_modules(photo_modules + video_modules)
 
             photo_results = []
             video_results = []
@@ -157,14 +158,23 @@ class GeneratePromptsPhotosVideos(CoreFlow):
                             all_tasks.add(task)
 
                     # ждём завершения всех задач (фото + видео)
-                    await asyncio.gather(*all_tasks)
+                    async def _watch_for_stop(tasks):
+                        await StopEvent.event.wait()
+                        for task in tasks:
+                            task.cancel()
+                    stop_watcher = asyncio.create_task(_watch_for_stop(all_tasks))
+
+                    try:
+                        await asyncio.gather(*all_tasks)
+                    except asyncio.CancelledError:
+                        pass
+                    finally:
+                        stop_watcher.cancel()
+
 
             if get_global_config().get("notify_on_end"):
                 telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
             return photo_results, video_results
-
-        except GenerationError as e:
-            return [], []
 
         except Exception as e:
             default_logger.critical(str(e))

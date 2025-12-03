@@ -4,8 +4,8 @@ import yaml
 from i18n import t
 
 from src.interface import Menu
-from src.interface.console_dialog import ask_database, ask_generation_amount, ask_photo_modules, ask_string, \
-    ask_video_modules, ask_yes_no, ask_not_negative_integers
+from src.interface.console_dialog import ask_database, ask_generation_amount, ask_not_negative_float, \
+    ask_not_negative_integers, ask_photo_modules, ask_string, ask_video_modules, ask_yes_no
 
 
 class SettingsMixin:
@@ -30,7 +30,9 @@ class SettingsMixin:
         "telegram_account": ask_string,
         "notify_account": ask_string,
         "notify_on_critical": ask_yes_no,
-        "notify_on_end": ask_yes_no
+        "notify_on_end": ask_yes_no,
+        "delay_normal": ask_not_negative_float,
+        "delay_spread": ask_not_negative_float,
     }
 
     @classmethod

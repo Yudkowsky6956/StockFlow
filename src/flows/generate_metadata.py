@@ -1,21 +1,22 @@
 import asyncio
 import traceback
 
-from tqdm.asyncio import tqdm_asyncio
-from loguru import logger as default_logger
 from i18n import t
+from loguru import logger as default_logger
+from tqdm.asyncio import tqdm_asyncio
 
-from src.interface.file_dialog import select_photos
-from src.interface.console_dialog import ask_double
-from src.core.keywords import Keywords
-from src.core.syntx import GenerationError, SyntxBot
 from src.core.database import Database
+from src.core.global_config import get_global_config
+from src.core.image_file import ImageFile
+from src.core.keywords import Keywords
+from src.core.logger import telegram_sink
+from src.core.stop_event import StopEvent
+from src.core.syntx import GenerationError, SyntxBot
+from src.interface.console_dialog import ask_double
+from src.interface.file_dialog import select_photos
 from src.modules import get_modules_objects
 from src.utils.sentances import wrap_by_words
 from .core_flow import CoreFlow
-from ..core.global_config import get_global_config
-from ..core.image_file import ImageFile
-from src.core.logger import telegram_sink
 
 
 class GenerateMetadata(CoreFlow):
@@ -45,7 +46,6 @@ class GenerateMetadata(CoreFlow):
     @classmethod
     async def _run(cls) -> list:
         default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
-        await cls._reset_modules()
 
         photos = select_photos()
         double = ask_double()
@@ -60,6 +60,7 @@ class GenerateMetadata(CoreFlow):
         module_name = gpt.get_name()
         module_color = gpt.get_color()
         photos = [ImageFile(photo) for photo in photos]
+        await cls._reset_modules([gpt])
 
         try:
             with Database(database_name) as db:
@@ -82,15 +83,25 @@ class GenerateMetadata(CoreFlow):
                                     )
                                 )
                             )
+                    async def _watch_for_stop(tasks):
+                        await StopEvent.event.wait()
+                        for task in tasks:
+                            task.cancel()
+                    stop_watcher = asyncio.create_task(_watch_for_stop(tasks))
 
-                    result = await tqdm_asyncio.gather(
-                        *tasks,
-                        desc=f"{module_name:<11}",
-                        unit=unit
-                    )
-                    if get_global_config().get("notify_on_end"):
-                        telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
-                    return result
+                    try:
+                        result = await tqdm_asyncio.gather(
+                            *tasks,
+                            desc=f"{module_name:<11}",
+                            unit=unit
+                        )
+                        if get_global_config().get("notify_on_end"):
+                            telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
+                        return result
+                    except asyncio.CancelledError:
+                        pass
+                    finally:
+                        stop_watcher.cancel()
 
         except Exception as e:
             default_logger.critical(str(e))

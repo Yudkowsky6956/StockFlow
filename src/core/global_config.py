@@ -1,4 +1,5 @@
 import yaml
+
 from src.core.vars import CONFIG_FOLDER
 
 DEBUG = False

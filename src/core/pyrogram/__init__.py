@@ -1,4 +1,4 @@
-from .session import Session
 from .bot import TelegramBot
 from .exceptions import WrongAPIException, WrongPhoneException
-from .secrets import set_api_id, set_api_hash
+from .secrets import set_api_hash, set_api_id
+from .session import Session

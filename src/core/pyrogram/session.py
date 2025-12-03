@@ -6,11 +6,11 @@ from loguru import logger
 from pyrogram import Client
 from pyrogram.errors.exceptions import ApiIdInvalid, PhoneNumberBanned, PhoneNumberInvalid
 
-from src.utils.normalize import normalize_phone
-from .secrets import get_api_hash, get_api_id
-from .exceptions import WrongAPIException, WrongPhoneException
-from .vars import SESSION_FOLDER
 from src.core.global_config import get_global_config
+from src.utils.normalize import normalize_phone
+from .exceptions import WrongAPIException, WrongPhoneException
+from .secrets import get_api_hash, get_api_id
+from .vars import SESSION_FOLDER
 
 
 def handle_client_exceptions(exc):

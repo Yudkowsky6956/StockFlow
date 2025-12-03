@@ -6,12 +6,13 @@ from loguru import logger as default_logger
 from tqdm.asyncio import tqdm_asyncio
 
 from src.core.database import Database
+from src.core.global_config import get_global_config
+from src.core.logger import telegram_sink
+from src.core.stop_event import StopEvent
 from src.core.syntx import GenerationError, SyntxBot
 from src.interface.file_dialog import select_photo_folder
 from src.modules import get_modules_objects
 from .core_flow import CoreFlow
-from ..core.global_config import get_global_config
-from ..core.logger import telegram_sink
 
 
 class GeneratePhotosFromPrompts(CoreFlow):
@@ -21,7 +22,6 @@ class GeneratePhotosFromPrompts(CoreFlow):
     @classmethod
     async def _run(cls) -> list:
         default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
-        await cls._reset_modules()
 
         destination = select_photo_folder()
 
@@ -33,6 +33,7 @@ class GeneratePhotosFromPrompts(CoreFlow):
         unit = t(f"config_flows.{cls.__name__}.progress_unit")
 
         modules = get_modules_objects(modules_names)
+        await cls._reset_modules(modules)
         tasks = []
         results = []
 
@@ -74,14 +75,25 @@ class GeneratePhotosFromPrompts(CoreFlow):
                             )
                         )
 
-                    nested_results = await asyncio.gather(*tasks)
-                    for result in nested_results:
-                        if not isinstance(result, list):
-                            result = [result]
-                        results.extend(result)
-                    if get_global_config().get("notify_on_end"):
-                        telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
-                    return results
+                    async def _watch_for_stop(tasks):
+                        await StopEvent.event.wait()
+                        for task in tasks:
+                            task.cancel()
+                    stop_watcher = asyncio.create_task(_watch_for_stop(tasks))
+
+                    try:
+                        nested_results = await asyncio.gather(*tasks)
+                        for result in nested_results:
+                            if not isinstance(result, list):
+                                result = [result]
+                            results.extend(result)
+                        if get_global_config().get("notify_on_end"):
+                            telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
+                        return results
+                    except asyncio.CancelledError:
+                        pass
+                    finally:
+                        stop_watcher.cancel()
 
         except GenerationError as e:
             return []

@@ -15,7 +15,9 @@ en:
   interface:
     ask:
       integer: "Enter integer"
-      not_negative_integer": "Enter not negative integer"
+      not_negative_integer: "Enter not negative integer"
+      float: "Enter number"
+      not_negative_float: "Enter not negative number"
       amount: "Enter amount"
       string: "Enter string"
       generations_amount: "Enter generations amount"

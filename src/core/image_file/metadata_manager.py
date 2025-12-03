@@ -1,7 +1,7 @@
-import pyexiv2
-
-from typing import Optional
 from pathlib import Path
+from typing import Optional
+
+import pyexiv2
 
 from .vars import *
 

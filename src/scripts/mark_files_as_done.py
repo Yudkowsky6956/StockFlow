@@ -1,11 +1,11 @@
-from loguru import logger as default_logger
-from i18n import t
-
 from pathlib import Path
 
+from i18n import t
+from loguru import logger as default_logger
+
 from src.core.database import Database
-from src.interface.file_dialog import select_photos_and_videos
 from src.interface.console_dialog import ask_database
+from src.interface.file_dialog import select_photos_and_videos
 from .core_script import FilesScripts
 
 

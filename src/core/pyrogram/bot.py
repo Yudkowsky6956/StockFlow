@@ -1,18 +1,17 @@
 import asyncio
+import random
 from pathlib import Path
 from typing import List, Optional, Union
 
 from loguru import logger as default_logger
 from pyrogram import filters, handlers
-from src.core.pyrogram.session import Session
 from pyrogram.enums import ParseMode
 from pyrogram.types import ChatEventFilter, InputMediaPhoto, Message
 
-import random
-
+from src.core.global_config import get_global_config
+from src.core.pyrogram.session import Session
 from src.utils.sentances import wrap_by_words
-from .filters import is_replying_to, button_map_filter
-
+from .filters import button_map_filter, is_replying_to
 
 
 class TelegramBot:
@@ -111,10 +110,18 @@ class TelegramBot:
 
     async def send_text(self, text: str, parse_mode=ParseMode.DISABLED, logger=default_logger) -> Message:
         """Sends text and returns message"""
-        # TODO: Перенести задержку в глобальный конфиг.
-        delay = max(min(random.gauss(1.5, 0.4), 4), 0.1)
+        config = get_global_config()
+        normal_delay = config.get("delay_normal", 1.5)
+        sigma = config.get("delay_spread", 0.5)
+        if normal_delay and sigma:
+            delay = random.gauss(normal_delay, sigma)
+        elif normal_delay and not sigma:
+            delay = normal_delay
+        else:
+            delay = 0
         logger.debug(f"Sending message with {self._compose_log(text, None)} and delay = \"{delay}\".")
-        await asyncio.sleep(delay)
+        if delay:
+            await asyncio.sleep(delay)
         return await self.client.send_message(self.id, text, parse_mode=parse_mode)
 
     @classmethod

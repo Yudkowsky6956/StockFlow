@@ -1,5 +1,5 @@
-from loguru import logger as default_logger
 from i18n import t
+from loguru import logger as default_logger
 
 from src.core.image_file import ImageFile
 from src.interface.file_dialog import select_photos

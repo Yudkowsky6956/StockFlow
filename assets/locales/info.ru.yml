@@ -16,7 +16,9 @@ ru:
   interface:
     ask:
       integer: "Введите целое число"
-      not_negative_integer": "Введите целое не отрицательное число"
+      not_negative_integer: "Введите целое не отрицательное число"
+      float: "Введите число"
+      not_negative_float: "Введите не отрицательное число"
       amount: "Введите кол-во"
       string: "Введите строку"
       generations_amount: "Введите кол-во генераций"

@@ -1,6 +1,6 @@
+from src.modules.design import MidjourneyModule, NanoModule
 from src.modules.gpt import GPTModule
 from src.modules.video import VideoInBot, VideoMiniApp
-from src.modules.design import NanoModule, MidjourneyModule
 from .vars import *
 
 

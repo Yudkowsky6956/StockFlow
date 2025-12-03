@@ -16,6 +16,14 @@ en:
       name: "Notify on end"
       message: "Should StockFlow send message to you if program ends successful"
       description: "Need to restart to apply setting."
+    delay_normal:
+      name: "Normal delay"
+      message: "Enter normal delay in seconds"
+      description: "Typically the delay before sending message will be this number of seconds."
+    delay_spread:
+      name: "Delay spread"
+      message: "Enter delay spread in seconds"
+      description: "The delay will deviate from the average by this number of seconds (Gaussian distribution)."
 
   GlobalSettings:
     name: "Global"

@@ -10,7 +10,7 @@ from src.core.pyrogram.filters import contains
 from src.core.settings_mixin import SettingsMixin
 from src.core.syntx.current_module import SyntxCurrentModule
 from src.core.syntx.event_lock import EventLock
-from src.core.syntx.exceptions import GenerationError, CanceledFlowError
+from src.core.syntx.exceptions import GenerationError
 from src.modules.vars import *
 
 
@@ -137,8 +137,6 @@ class SyntxModule(CoreModule):
                 raise GenerationError(log_message, log=log_message, delay=e.value, lock=True)
         except GenerationError as e:
             return await cls._handle_generation_error(e, name, database, logger, mark, *args, **kwargs)
-        except CanceledFlowError:
-            return []
 
 
     @classmethod

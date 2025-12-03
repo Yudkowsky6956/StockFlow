@@ -1,6 +1,7 @@
-from .core_menu import ConfigurableMenu, Menu
-from src.scripts import DB_SCRIPTS_LIST, FILES_SCRIPTS_LIST, INFOGRAPHICS_SCRIPTS_LIST
 from i18n import t
+
+from src.scripts import DB_SCRIPTS_LIST, FILES_SCRIPTS_LIST, INFOGRAPHICS_SCRIPTS_LIST
+from .core_menu import ConfigurableMenu, Menu
 
 
 class ScriptsSubMenu(ConfigurableMenu):

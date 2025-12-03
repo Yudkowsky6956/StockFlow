@@ -1,5 +1,5 @@
-from .core_menu import ConfigurableMenu
 from src.flows import FLOWS_LIST
+from .core_menu import ConfigurableMenu
 
 
 class FlowsMenu(ConfigurableMenu):

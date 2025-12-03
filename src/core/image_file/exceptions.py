@@ -1,4 +1,3 @@
-# TODO: Заменить этот Exception на базовый
 
 
 class FilemakerError(Exception):

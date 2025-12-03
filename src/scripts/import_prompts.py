@@ -1,11 +1,11 @@
-from loguru import logger as default_logger
-from i18n import t
 from InquirerPy import inquirer
+from i18n import t
+from loguru import logger as default_logger
 
-from .core_script import ScriptsDB
 from src.core.database import Database
-from src.interface.file_dialog import select_txt
 from src.interface.console_dialog import ask_database
+from src.interface.file_dialog import select_txt
+from .core_script import ScriptsDB
 
 
 class ImportPrompts(ScriptsDB):

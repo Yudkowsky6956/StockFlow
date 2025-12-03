@@ -1,8 +1,8 @@
 import asyncio
 
 from src.core.settings_mixin import SettingsMixin
-from src.core.syntx.current_module import SyntxCurrentModule
 from src.core.stop_event import StopEvent
+from src.core.syntx.current_module import SyntxCurrentModule
 from .vars import FLOWS_YML
 
 

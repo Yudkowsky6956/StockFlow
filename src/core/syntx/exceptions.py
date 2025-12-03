@@ -6,6 +6,3 @@ class GenerationError(Exception):
         self.fatal = fatal
         self.mark = mark
         self.lock = lock
-
-class CanceledFlowError(Exception):
-    pass

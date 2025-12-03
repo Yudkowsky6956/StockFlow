@@ -1,15 +1,16 @@
 import asyncio
 import json
 from pathlib import Path
-import pandas as pd
-import numpy as np
-from loguru import logger
-from tqdm.asyncio import tqdm_asyncio
-from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 
+import numpy as np
+import pandas as pd
 from i18n import t
-from src.interface.file_dialog import select_scv
+from loguru import logger
+from playwright.async_api import Error as PlaywrightError, TimeoutError as PlaywrightTimeoutError, async_playwright
+from tqdm.asyncio import tqdm_asyncio
+
 import src.core.global_config as config
+from src.interface.file_dialog import select_scv
 from .core_script import InfographicsScripts
 
 CACHE_DIR = Path("cached")

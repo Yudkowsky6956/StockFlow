@@ -1,17 +1,18 @@
 import asyncio
-
-from tqdm.asyncio import tqdm_asyncio
-from loguru import logger as default_logger
-from i18n import t
 import traceback
 
-from src.utils.sentances import wrap_by_words
-from src.core.syntx import GenerationError, SyntxBot
+from i18n import t
+from loguru import logger as default_logger
+from tqdm.asyncio import tqdm_asyncio
+
 from src.core.database import Database
+from src.core.global_config import get_global_config
+from src.core.logger import telegram_sink
+from src.core.stop_event import StopEvent
+from src.core.syntx import GenerationError, SyntxBot
 from src.modules import get_modules_objects
+from src.utils.sentances import wrap_by_words
 from .core_flow import CoreFlow
-from ..core.global_config import get_global_config
-from ..core.logger import telegram_sink
 
 
 class ParaphrasePrompts(CoreFlow):
@@ -38,7 +39,6 @@ class ParaphrasePrompts(CoreFlow):
     @classmethod
     async def _run(cls) -> list:
         default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
-        await cls._reset_modules()
 
         flow_config = cls.get_config()
         pre_template = flow_config.get("pre_template")
@@ -49,6 +49,7 @@ class ParaphrasePrompts(CoreFlow):
         tasks = []
 
         gpt = get_modules_objects("GPT")
+        await cls._reset_modules([gpt])
         module_name = gpt.get_name()
         module_color = gpt.get_color()
 
@@ -81,15 +82,26 @@ class ParaphrasePrompts(CoreFlow):
                                     )
                                 )
                             )
+                    async def _watch_for_stop(tasks):
+                        await StopEvent.event.wait()
+                        for task in tasks:
+                            task.cancel()
+                    stop_watcher = asyncio.create_task(_watch_for_stop(tasks))
 
-                    result = await tqdm_asyncio.gather(
-                        *tasks,
-                        desc=f"{module_name:<11}",
-                        unit=unit
-                    )
-                    if get_global_config().get("notify_on_end"):
-                        telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
-                    return result
+                    try:
+                        result = await tqdm_asyncio.gather(
+                            *tasks,
+                            desc=f"{module_name:<11}",
+                            unit=unit
+                        )
+                        if get_global_config().get("notify_on_end"):
+                            telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
+                        return result
+                    except asyncio.CancelledError:
+                        pass
+                    finally:
+                        stop_watcher.cancel()
+
 
         except GenerationError as e:
             return []

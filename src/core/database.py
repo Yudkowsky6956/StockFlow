@@ -1,12 +1,11 @@
 import sqlite3
 from collections import namedtuple
 
-from loguru import logger
 from i18n import t
+from loguru import logger
 
+from src.utils.hash import get_short_hash
 from .vars import DATABASE_FOLDER
-from ..utils.hash import get_short_hash
-
 
 PromptRecord = namedtuple("PromptRecord", ["prompt", "alt_prompt", "hash"])
 

@@ -1,18 +1,18 @@
 import asyncio
 import traceback
 
-from tqdm.asyncio import tqdm_asyncio
-from loguru import logger as default_logger
 from i18n import t
+from loguru import logger as default_logger
+from tqdm.asyncio import tqdm_asyncio
 
+from src.core.database import Database
+from src.core.global_config import get_global_config
+from src.core.logger import telegram_sink
 from src.core.stop_event import StopEvent
 from src.core.syntx import SyntxBot
-from src.core.database import Database
 from src.interface.file_dialog import select_video_folder
 from src.modules import get_modules_objects
 from .core_flow import CoreFlow
-from ..core.global_config import get_global_config
-from ..core.logger import telegram_sink
 
 
 class GenerateVideosFromPrompts(CoreFlow):

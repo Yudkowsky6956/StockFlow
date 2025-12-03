@@ -1,4 +1,3 @@
-# ОТКЛЮЧАЕМ ЛОГИ У DASH
 import logging
 import webbrowser
 from threading import Timer

@@ -1,7 +1,7 @@
 import random
-from typing import Optional, List
+from typing import List, Optional
 
-from src.utils.keywords import unique_list, delete_intersections, convert_to_single, convert_to_double
+from src.utils.keywords import convert_to_double, convert_to_single, delete_intersections, unique_list
 
 
 class Keywords:

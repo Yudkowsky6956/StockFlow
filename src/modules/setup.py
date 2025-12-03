@@ -1,6 +1,7 @@
-from .modules import Runway
-from ..core.syntx import SyntxBot
 from pyrogram.types import InlineKeyboardMarkup
+
+from .modules import Runway
+from src.core.syntx import SyntxBot
 
 
 async def setup_modules(bot: SyntxBot):

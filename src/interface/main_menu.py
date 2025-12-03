@@ -1,8 +1,7 @@
 from .core_menu import Menu
-from .settings import SettingsMenu
-from .scripts import ScriptsMenu
 from .flows import FlowsMenu
-
+from .scripts import ScriptsMenu
+from .settings import SettingsMenu
 
 MAIN_MENU_LIST = [FlowsMenu, ScriptsMenu, SettingsMenu]
 
