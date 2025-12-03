@@ -1,8 +1,9 @@
 import asyncio
 
 from src.core.settings_mixin import SettingsMixin
+from src.core.syntx.current_module import SyntxCurrentModule
+from src.core.stop_event import StopEvent
 from .vars import FLOWS_YML
-from ..core.syntx import GenerationError
 
 
 class CoreFlow(SettingsMixin):
@@ -17,11 +18,15 @@ class CoreFlow(SettingsMixin):
         Синхронная точка входа в сценарий.
         Возвращает список результатов сценария.
         """
-        try:
-            result = asyncio.run(cls._run())
-            return result
-        except GenerationError:
-            return []
+        result = asyncio.run(cls._run())
+        return result
+
+    @classmethod
+    async def _reset_modules(cls, modules):
+        SyntxCurrentModule.reset()
+        StopEvent.event = asyncio.Event()
+        for module in modules:
+            await module.init_locks()
 
     @classmethod
     async def _run(cls) -> list:

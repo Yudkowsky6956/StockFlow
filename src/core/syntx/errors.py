@@ -131,7 +131,11 @@ VIDEO_TOO_LONG = HandlerError(
     log="error.handlers.video_too_long",
     fatal=True,
 )
-
+NO_SUBSCRIPTION = HandlerError(
+    message="Чтобы продолжить работу, пожалуйста, приобретите подписку",
+    log="error.handlers.no_subscription",
+    fatal=True
+)
 
 # GLOBAL
 GLOBAL_BANNED_ERROR = HandlerError(
@@ -150,5 +154,5 @@ ALL_ERRORS = [
     BLOCK_1, BLOCK_2, BLOCK_3, BLOCK_4, BLOCK_5, BLOCK_6, BLOCK_7, TOO_SHORT,
     BLOCK_FULL, MODEL_ERROR_1, YOU_ALREADY_LOAD_IMAGE,
     WAIT_UNTIL_NEXT_REQUEST, MODEL_ERROR_2, REQUEST_LIMIT, NO_TOOL,
-    PLEASE_WAIT, ON_UPDATE, ON_FIXING, CANT_START_GENERATION, VIDEO_TOO_LONG,
+    PLEASE_WAIT, ON_UPDATE, ON_FIXING, CANT_START_GENERATION, VIDEO_TOO_LONG
 ]

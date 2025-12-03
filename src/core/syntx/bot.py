@@ -3,17 +3,17 @@ import asyncio
 
 from loguru import logger as default_logger
 from pyrogram.filters import AndFilter
-from pyrogram.types import Message
-from pyrogram.handlers import MessageHandler
 from pyrogram import filters
+from pyrogram.types import Message
 from i18n import t
 
 from src.modules.core_module import SyntxModule
 from src.core.pyrogram.session import Session
 from src.core.pyrogram.bot import TelegramBot
 from src.core.pyrogram.filters import contains, is_replying_to, message_exists
-from .errors import ALL_ERRORS, HandlerError, GLOBAL_BANNED_ERROR
+from .errors import ALL_ERRORS, HandlerError, GLOBAL_BANNED_ERROR, NO_SUBSCRIPTION
 from .exceptions import GenerationError
+from src.core.stop_event import StopEvent
 
 
 class SyntxBot(TelegramBot):
@@ -26,14 +26,16 @@ class SyntxBot(TelegramBot):
         super().__init__(session, phone_number)
         SyntxModule.set_bot(self)
 
-        # Добавляем глобальный хэндлер выключения.
-        def global_banned_handler():
-            error = GLOBAL_BANNED_ERROR
-            default_logger.critical(t(error.log))
-            raise GenerationError(error.message, log=error.log, delay=error.delay, fatal=error.fatal, mark=error.mark, lock=error.lock)
+        @self.client.on_message(filters.chat(self.id) & contains(GLOBAL_BANNED_ERROR.message))
+        async def stop_cmd(_, message):
+            default_logger.critical(t(GLOBAL_BANNED_ERROR.log))
+            StopEvent.event.set()
 
-        handler = MessageHandler(global_banned_handler, filters.chat(self.id) & contains(GLOBAL_BANNED_ERROR.message))
-        self.client.add_handler(handler)
+        @self.client.on_message(filters.chat(self.id) & contains(NO_SUBSCRIPTION.message))
+        async def stop_cmd(_, message):
+            default_logger.critical(t(NO_SUBSCRIPTION.log))
+            StopEvent.event.set()
+
 
     async def wait_for(self, flt: AndFilter, message: Optional[Message] = None, send: bool = True, edit: bool = True, reply: bool = False, logger=default_logger, future=None, request_message=None, photo=None, button_map=None, wait=True) -> Message:
         local_handlers = []

@@ -1,6 +1,5 @@
 import asyncio
 
-import yaml
 from i18n import t
 from loguru import logger as default_logger
 from pyrogram.errors import FloodWait
@@ -11,13 +10,15 @@ from src.core.pyrogram.filters import contains
 from src.core.settings_mixin import SettingsMixin
 from src.core.syntx.current_module import SyntxCurrentModule
 from src.core.syntx.event_lock import EventLock
-from src.core.syntx.exceptions import GenerationError
+from src.core.syntx.exceptions import GenerationError, CanceledFlowError
 from src.modules.vars import *
 
 
 class CoreModule(SettingsMixin):
     CONFIG_PARAMETERS = ["name", "color", "timeout", "batch_size"]
     menu_config_name = "modules"
+    event_lock = None
+    syntx_lock = None
     semaphore = None
     CONFIG_PATH = MODULES_YML
     LOCALE_NAME = "config_module"
@@ -56,8 +57,6 @@ class CoreModule(SettingsMixin):
 
 
 class SyntxModule(CoreModule):
-    event_lock: EventLock = EventLock()
-    syntx_lock = asyncio.Lock()
     menu_message = MENU_MESSAGE
     menu_response = MENU_RESPONSE
     _bot = None
@@ -71,6 +70,13 @@ class SyntxModule(CoreModule):
         if not cls._bot:
             raise RuntimeError("You can't use SyntxModule without bot. Please call \"set_bot\"")
         return cls._bot
+
+    @classmethod
+    async def init_locks(cls):
+        config = cls.get_config()
+        cls.semaphore = asyncio.Semaphore(config.get("batch_size", 1))
+        cls.syntx_lock = asyncio.Lock()
+        cls.event_lock = EventLock()
 
     @classmethod
     async def _handle_generation_error(cls, e: GenerationError, name: str, database: Database,  logger, mark=True, *args, **kwargs):
@@ -90,7 +96,7 @@ class SyntxModule(CoreModule):
             return await cls.run(name, logger, database, mark, *args, **kwargs)
 
         if e.fatal:
-            raise
+            raise e
 
     @classmethod
     async def run_back(cls, name: str, database: Database, logger, mark=True, *args, **kwargs):
@@ -131,9 +137,9 @@ class SyntxModule(CoreModule):
                 raise GenerationError(log_message, log=log_message, delay=e.value, lock=True)
         except GenerationError as e:
             return await cls._handle_generation_error(e, name, database, logger, mark, *args, **kwargs)
-        # finally:
-        #     if cls.syntx_lock.locked():
-        #         cls.syntx_lock.release()
+        except CanceledFlowError:
+            return []
+
 
     @classmethod
     async def get_button_url(cls, message: Message, button_text: str) -> str:

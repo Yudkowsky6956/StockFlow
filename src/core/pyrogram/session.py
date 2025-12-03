@@ -9,7 +9,8 @@ from pyrogram.errors.exceptions import ApiIdInvalid, PhoneNumberBanned, PhoneNum
 from src.utils.normalize import normalize_phone
 from .secrets import get_api_hash, get_api_id
 from .exceptions import WrongAPIException, WrongPhoneException
-from .vars import SESSION_CURRENT, SESSION_FOLDER
+from .vars import SESSION_FOLDER
+from src.core.global_config import get_global_config
 
 
 def handle_client_exceptions(exc):
@@ -48,7 +49,6 @@ def client_error_handler(function):
 class Session:
     """Class that represents one Pyrogram session"""
     session_folder = SESSION_FOLDER
-    session_current = SESSION_CURRENT
 
     def __init__(self, phone_number: str = None):
         self._client = None
@@ -144,15 +144,12 @@ class Session:
 
     @classmethod
     def current(cls):
-        SESSION_CURRENT.touch()
-        return SESSION_CURRENT.read_text()
+        return get_global_config().get("telegram_account")
 
     @classmethod
     def ensure_paths(cls):
-        """Ensures that session folder and session current exists"""
+        """Ensures that session folder exists"""
         cls.session_folder.mkdir(parents=True, exist_ok=True)
-        if cls.session_current.exists():
-            cls.session_current.touch()
 
 
 

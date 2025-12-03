@@ -1,7 +1,5 @@
 import asyncio
 
-import loguru
-
 
 class EventLock:
     def __init__(self):
@@ -17,4 +15,8 @@ class EventLock:
 
     def turn_off(self):
         """Выключаем блокировку: все проходят сразу"""
+        self._event.set()
+
+    def reset(self):
+        self._event = asyncio.Event()
         self._event.set()

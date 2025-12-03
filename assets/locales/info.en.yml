@@ -101,6 +101,7 @@ en:
       done: "Hash creation finished."
     imported_prompts: "Imported {amount} prompts."
   flows:
+    flow_ended: "Flow \"{name}\" ended."
     folder_selected: "Folder selected: {folder}"
     files_selected_in_folder: "Files selected in folder: {folder}"
     file_selected: "File selected: {file}"

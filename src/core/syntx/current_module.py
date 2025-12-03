@@ -30,3 +30,8 @@ class SyntxCurrentModule:
     async def clear(cls) -> None:
         async with cls._get_lock():
             cls._value = None
+
+    @classmethod
+    def reset(cls) -> None:
+        cls._value: Optional[Any] = None
+        cls._lock: Optional[asyncio.Lock] = None

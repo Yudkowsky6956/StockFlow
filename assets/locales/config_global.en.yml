@@ -1,0 +1,22 @@
+en:
+  default:
+    telegram_account:
+      name: "Telegram Account"
+      message: "Enter your Telegram account's phone number"
+      description: "Maybe you'll need to enter confirmation code later."
+    notify_account:
+      name: "Notify Account"
+      message: "Enter ID of your main Telegram account"
+      description: "StockFlow will notify you if some critical error occurred. Leave blank to disable notifications."
+    notify_on_critical:
+      name: "Notify on critical"
+      message: "Should StockFlow send message to you if critical error occurred"
+      description: "Need to restart to apply setting."
+    notify_on_end:
+      name: "Notify on end"
+      message: "Should StockFlow send message to you if program ends successful"
+      description: "Need to restart to apply setting."
+
+  GlobalSettings:
+    name: "Global"
+    choice: "🌐 Global"

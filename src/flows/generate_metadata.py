@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 
 from tqdm.asyncio import tqdm_asyncio
 from loguru import logger as default_logger
@@ -12,7 +13,9 @@ from src.core.database import Database
 from src.modules import get_modules_objects
 from src.utils.sentances import wrap_by_words
 from .core_flow import CoreFlow
+from ..core.global_config import get_global_config
 from ..core.image_file import ImageFile
+from src.core.logger import telegram_sink
 
 
 class GenerateMetadata(CoreFlow):
@@ -42,6 +45,7 @@ class GenerateMetadata(CoreFlow):
     @classmethod
     async def _run(cls) -> list:
         default_logger.success(f"{t("info.flows.starting_flow")}: {t(f"config_flows.{cls.__name__}.choice")}")
+        await cls._reset_modules()
 
         photos = select_photos()
         double = ask_double()
@@ -57,29 +61,39 @@ class GenerateMetadata(CoreFlow):
         module_color = gpt.get_color()
         photos = [ImageFile(photo) for photo in photos]
 
-        with Database(database_name) as db:
-            async with SyntxBot().client:
-                for photo in photos:
-                    if not (photo.title or photo.description or photo.keywords):
-                        name = photo.path.stem
-                        logger = default_logger.bind(name=name, module_name=module_name, module_color=module_color)
+        try:
+            with Database(database_name) as db:
+                async with SyntxBot().client:
+                    for photo in photos:
+                        if not (photo.title or photo.description or photo.keywords):
+                            name = photo.path.stem
+                            logger = default_logger.bind(name=name, module_name=module_name, module_color=module_color)
 
-                        tasks.append(
-                            asyncio.create_task(
-                                cls._task(
-                                    name=name,
-                                    logger=logger,
-                                    database=db,
-                                    image_file=photo,
-                                    gpt_template=gpt_template,
-                                    double=double,
-                                    gpt=gpt
+                            tasks.append(
+                                asyncio.create_task(
+                                    cls._task(
+                                        name=name,
+                                        logger=logger,
+                                        database=db,
+                                        image_file=photo,
+                                        gpt_template=gpt_template,
+                                        double=double,
+                                        gpt=gpt
+                                    )
                                 )
                             )
-                        )
 
-                return await tqdm_asyncio.gather(
-                    *tasks,
-                    desc=f"{module_name:<11}",
-                    unit=unit
-                )
+                    result = await tqdm_asyncio.gather(
+                        *tasks,
+                        desc=f"{module_name:<11}",
+                        unit=unit
+                    )
+                    if get_global_config().get("notify_on_end"):
+                        telegram_sink(t("info.flows.flow_ended").format(name=t(f"config_flows.{cls.__name__}.choice")))
+                    return result
+
+        except Exception as e:
+            default_logger.critical(str(e))
+            traceback.print_exc()
+            return []
+

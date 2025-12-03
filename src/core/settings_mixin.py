@@ -27,6 +27,10 @@ class SettingsMixin:
         "batch_size": ask_not_negative_integers,
         "flags": ask_string,
         "one_video_per_photo": ask_yes_no,
+        "telegram_account": ask_string,
+        "notify_account": ask_string,
+        "notify_on_critical": ask_yes_no,
+        "notify_on_end": ask_yes_no
     }
 
     @classmethod

@@ -101,6 +101,7 @@ ru:
       done: "Создание хэшей завершено."
     imported_prompts: "Импортировано {amount} промптов."
   flows:
+    flow_ended: "Сценарий \"{name}\" завершился."
     folder_selected: "Выбрана папка: {folder}"
     files_selected_in_folder: "Файлы выбраны в папке: {folder}"
     file_selected: "Файл выбран: {file}"

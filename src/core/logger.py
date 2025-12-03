@@ -1,13 +1,25 @@
-import sys
 from datetime import datetime
-
+from pyrogram import Client
 import i18n
-from loguru import logger
 from tqdm import tqdm
-
+import asyncio
+import socket
+from loguru import logger
+from src.core.global_config import get_global_config
 from src.utils.hash import get_color_hash
 import src.core.global_config as config
 from .vars import LOGS_FOLDER, LOCALES_FOLDER
+from src.core.secrets import get_env
+from src.core.pyrogram.vars import ENV_API_ID, ENV_API_HASH, BOT_TOKEN
+from src.core.pyrogram.vars import SESSION_FOLDER
+
+
+def telegram_sink(record):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    notify_account = get_global_config().get("notify_account")
+    with Client("stockflow_bot", get_env(ENV_API_ID), get_env(ENV_API_HASH), bot_token=get_env(BOT_TOKEN), workdir=SESSION_FOLDER) as client:
+        client.send_message(notify_account, f"{socket.gethostname()} | {record}")
 
 
 def formatter(record):
@@ -73,7 +85,7 @@ def setup_logger():
         mode="w"
     )
 
-    # Console
+    # Консоль
     logger.add(
         sink=lambda msg: tqdm.write(msg, end=""),
         format=formatter,
@@ -81,3 +93,10 @@ def setup_logger():
         colorize=True,
         enqueue=True,
     )
+    if get_global_config().get("notify_on_critical"):
+        # Telegram для CRITICAL
+        logger.add(
+            sink=telegram_sink,
+            level="CRITICAL",
+            enqueue=True
+        )
