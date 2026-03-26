@@ -4,7 +4,7 @@ from i18n import t
 from loguru import logger as default_logger
 
 from src.core.database import Database
-from src.interface.console_dialog import ask_database
+from src.interface.async_console_dialog import ask_database
 from src.interface.file_dialog import select_photos_and_videos
 from .core_script import FilesScripts
 
@@ -28,7 +28,7 @@ class MarkFilesAsDone(FilesScripts):
         if not prepare_list:
             return
 
-        db_name = ask_database()
+        db_name = await ask_database()
         if not db_name:
             return
         db = Database(db_name)

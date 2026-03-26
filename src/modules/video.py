@@ -11,6 +11,7 @@ from src.core.database import Database
 from src.core.pyrogram.filters import contains
 from src.core.syntx.exceptions import GenerationError
 from src.modules.core_module import AgentModule
+from src.core.syntx import locks
 from src.modules.vars import *
 from src.modules.vars import EMPTY_PROMPT
 from src.utils.sentances import compile_prompt
@@ -50,22 +51,18 @@ class VideoModule(AgentModule):
         return answer_message, image_loaded_message
 
     @classmethod
-    async def download(cls, message: Message, path: Path) -> Path:
-        return await cls.bot().download(message, path)
-
-    @classmethod
     async def _run(cls, name: str, logger, prompt: str, database: Database, destination: Path, photo: Path | list[Path] | None = None):
         config = cls.get_config()
         model_and_name = f"{config["name"]}_{name}"
-        prompt = compile_prompt(model_and_name, prompt)
+        prompt = compile_prompt(model_and_name, prompt)[:500]
         message = await cls._generate(prompt=prompt, photo=photo, logger=logger)
-        return await cls.download(message, destination / f"{model_and_name}.mp4")
+        return await cls.download(message, destination / f"{model_and_name}.mp4", logger)
 
 
 class VideoInBot(VideoModule):
     @classmethod
     async def _generate(cls, prompt: str, logger, photo: Path | list[Path] | None = None) -> Message:
-        async with cls.syntx_lock:
+        async with locks.locks["syntx_lock"]:
             await cls.start()
             if photo:
                 await cls.load_photos(photo, logger)
@@ -110,7 +107,7 @@ class VideoMiniApp(VideoModule):
     async def _generate(cls, logger, prompt: Optional[str] = None, photo: Path | list[Path] | None = None) -> Message:
         if not prompt:
             prompt = EMPTY_PROMPT
-        async with cls.syntx_lock:
+        async with locks.locks["syntx_lock"]:
             await cls.start()
             if photo:
                 start_generation_message, prompt_message = await cls.load_photos(photo, logger)

@@ -20,8 +20,9 @@ def telegram_sink(record):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     notify_account = get_global_config().get("notify_account")
-    with Client("stockflow_bot", get_env(ENV_API_ID), get_env(ENV_API_HASH), bot_token=get_env(BOT_TOKEN), workdir=SESSION_FOLDER) as client:
-        client.send_message(notify_account, f"{socket.gethostname()} | {record}")
+    bot = Client("stockflow_bot", get_env(ENV_API_ID), get_env(ENV_API_HASH), bot_token=get_env(BOT_TOKEN), workdir=SESSION_FOLDER)
+    with bot:
+        bot.send_message(notify_account, f"{socket.gethostname()} | {record}")
 
 
 def formatter(record):

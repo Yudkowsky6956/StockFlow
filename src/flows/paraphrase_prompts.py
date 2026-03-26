@@ -13,6 +13,7 @@ from src.core.syntx import GenerationError, SyntxBot
 from src.modules import get_modules_objects
 from src.utils.sentances import wrap_by_words
 from .core_flow import CoreFlow
+from ..utils.hash import get_short_hash
 
 
 class ParaphrasePrompts(CoreFlow):
@@ -55,12 +56,13 @@ class ParaphrasePrompts(CoreFlow):
 
         try:
             with Database(database_name) as db:
+                db.ensure_hash()
                 rows = db.get_not_paraphrased()
 
                 async with SyntxBot().client:
                     for row in rows:
                         prompt = row.prompt
-                        name = row.hash
+                        name = get_short_hash(prompt)
                         paraphrased = row.alt_prompt
                         logger = default_logger.bind(
                             name=name,
@@ -101,10 +103,6 @@ class ParaphrasePrompts(CoreFlow):
                         pass
                     finally:
                         stop_watcher.cancel()
-
-
-        except GenerationError as e:
-            return []
 
         except Exception as e:
             default_logger.critical(str(e))

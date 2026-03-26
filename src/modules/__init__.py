@@ -6,12 +6,14 @@ Sora = lazy_import("src.modules.modules", "Sora")
 MiniMax = lazy_import("src.modules.modules", "MiniMax")
 Luma = lazy_import("src.modules.modules", "Luma")
 GPT = lazy_import("src.modules.modules", "GPT")
+OpenAIGPT = lazy_import("src.modules.modules", "OpenAIGPT")
 Midjourney = lazy_import("src.modules.modules", "Midjourney")
 Nano = lazy_import("src.modules.modules", "Nano")
 
 
 ALL_MODULES = {
     "GPT": GPT,
+    "OpenAIGPT": OpenAIGPT,
     "VEO": Veo,
     "RUNWAY": Runway,
     "SORA": Sora,

@@ -6,8 +6,12 @@ en:
     choice: "Mark files as done"
 
   ImportPrompts:
-    name: "Import prompts"
-    choice: "Import prompts"
+    name: "Import prompts from TXT"
+    choice: "Import prompts from TXT"
+
+  ImportPromptsCSV:
+    name: "Import prompts from CSV"
+    choice: "Import prompts from CSV"
 
   ClearMetadata:
     name: "Clear metadata"
@@ -24,6 +28,10 @@ en:
       name: "Timeout"
       message: "Enter the number of seconds until timeout"
       description: "After that period of time will a request to Adobe Stock be considered expired."
+
+  PrintLastMessage:
+    name: "Print last message"
+    choice: "Print last message"
 
   ShowSalesData:
     name: "Show sales data"

@@ -27,6 +27,9 @@ ru:
       new_database: "➕  Новая база данных"
       video_modules: "Выберите видео-модули"
       yes_no_message: "Выберите да или нет"
+      double_message: "Двойные или одиночные ключевые слова"
+      double_true: "Двойные"
+      double_false: "Одиночные"
       yes_answer: "Да"
       no_answer: "Нет"
     select:

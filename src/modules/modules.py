@@ -1,5 +1,5 @@
 from src.modules.design import MidjourneyModule, NanoModule
-from src.modules.gpt import GPTModule
+from src.modules.gpt import GPTModule, OpenAIGPTModule
 from src.modules.video import VideoInBot, VideoMiniApp
 from .vars import *
 
@@ -27,6 +27,10 @@ class Luma(VideoInBot):
 
 class GPT(GPTModule):
     pass
+
+class OpenAIGPT(OpenAIGPTModule):
+    CONFIG_PARAMETERS = OpenAIGPTModule.CONFIG_PARAMETERS + ["max_width", "max_height", "quality"]
+
 
 class Midjourney(MidjourneyModule):
     CONFIG_PARAMETERS = MidjourneyModule.CONFIG_PARAMETERS + ["flags"]

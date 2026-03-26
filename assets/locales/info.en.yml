@@ -27,6 +27,9 @@ en:
       video_modules: "Select video modules"
       photo_modules: "Select photo modules"
       yes_no_message: "Select yes or no"
+      double_message: "Double or single"
+      double_true: "Double"
+      double_false: "Single"
       yes_answer: "Yes"
       no_answer: "No"
     select:

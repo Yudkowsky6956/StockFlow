@@ -13,7 +13,7 @@ ru:
     on_fixing: "Модель проходит плановое обслуживание."
     cant_start_generation: "Модель не смогла запустить в генерацию указанный промпт."
     video_too_long: "Ошибка обработки. Длительность видео слишком высока. Максимум 480p/720p = 10 / 1080p = 5 секунд."
-    global_banned: "Получен глобальный бан в Syntx!"
+    global_banned_error: "Получен глобальный бан в Syntx!"
     no_subscription: "Ошибка SyntxAI. Нет подписки!"
   interface:
     select:
@@ -22,4 +22,5 @@ ru:
       file_not_selected: "Файл не был выбран."
   timeout_error: "Время ожидания завершения истекло."
   wrong_conversation_url: "Устаревший URL диалога! Обнови его в \"Скрипты -> Обновить URL диалога\"."
+  wrong_gpt_answer: "Что-то не так! GPT не отвечает JSON-ом."
   flood_wait: "Телеграм ограничил запросы на {delay} секунд."

@@ -3,7 +3,7 @@ from i18n import t
 from loguru import logger as default_logger
 
 from src.core.database import Database
-from src.interface.console_dialog import ask_database
+from src.interface.async_console_dialog import ask_database
 from src.interface.file_dialog import select_txt
 from .core_script import ScriptsDB
 
@@ -28,14 +28,14 @@ class ImportPrompts(ScriptsDB):
             choices=[t(cls.original_answer_locale), t(cls.paraphrased_answer_locale)]
         ).execute()
 
-        db_name = ask_database()
+        db_name = await ask_database()
         if not db_name:
             return
-        db = Database(db_name)
+        with Database(db_name) as db:
 
-        if choice == t(cls.original_answer_locale):
-            db.import_prompts(prompts)
-        elif choice == t(cls.paraphrased_answer_locale):
-            db.import_alt_prompts(prompts)
+            if choice == t(cls.original_answer_locale):
+                db.import_prompts(prompts)
+            elif choice == t(cls.paraphrased_answer_locale):
+                db.import_alt_prompts(prompts)
 
         logger.success(t(cls.success_locale), amount=len(prompts), type=choice, database=db_name)

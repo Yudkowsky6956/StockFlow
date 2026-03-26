@@ -13,7 +13,7 @@ en:
     on_fixing: "Model on fixing."
     cant_start_generation: "Model can't start generating this prompt."
     video_too_long: "Processing error. The video length is too long. Maximum 480p/720p = 10 / 1080p = 5 seconds."
-    global_banned: "Global ban in Syntx!"
+    global_banned_error: "Global ban in Syntx!"
     no_subscription: "SyntxAI Error. No subscription!"
   interface:
     select:
@@ -22,4 +22,5 @@ en:
       file_not_selected: "File wasn't selected."
   timeout_error: "Timeout error."
   wrong_conversation_url: "Wrong conversation URL! Change it in Utils -> Update conversation URL"
+  wrong_gpt_answer: "Something wrong! GPT's answer not containing JSON."
   flood_wait: "Telegram limited your requests for {delay} seconds."

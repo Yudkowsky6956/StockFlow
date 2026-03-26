@@ -8,3 +8,4 @@ analytics
 data
 *.db
 *.run
+config

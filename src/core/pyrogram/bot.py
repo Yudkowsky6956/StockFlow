@@ -2,11 +2,13 @@ import asyncio
 import random
 from pathlib import Path
 from typing import List, Optional, Union
+import aiohttp
 
 from loguru import logger as default_logger
 from pyrogram import filters, handlers
 from pyrogram.enums import ParseMode
 from pyrogram.types import ChatEventFilter, InputMediaPhoto, Message
+from pyrogram.enums import MessageEntityType
 
 from src.core.global_config import get_global_config
 from src.core.pyrogram.session import Session
@@ -181,8 +183,30 @@ class TelegramBot:
         logger.debug(f"Clicking button with text: \"{text}\".")
         await message.click(text)
 
+    @staticmethod
+    def _extract_hidden_url(message: Message) -> str | None:
+        """Ищет ссылки в сообщении"""
+        if message.caption_entities:
+            for entity in message.caption_entities:
+                if entity.type == MessageEntityType.TEXT_LINK:
+                    return entity.url
+        return None
+
+    @staticmethod
+    async def _download_from_url(url: str, path: Path) -> Path:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                resp.raise_for_status()
+                data = await resp.read()
+
+        path.write_bytes(data)
+        return path
+
     async def download(self, message: Message, path: Path, logger=default_logger) -> Path | None:
         """Downloads file from Message and returns Path"""
+        url = self._extract_hidden_url(message)
+        if url:
+            return await self._download_from_url(url, path)
         if message.media:
             logger.debug(f"Downloading media from message with {self._compose_log(message.text or message.caption, None)}.")
             return Path(await message.download(str(path), in_memory=False))

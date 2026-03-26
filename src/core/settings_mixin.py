@@ -27,12 +27,18 @@ class SettingsMixin:
         "batch_size": ask_not_negative_integers,
         "flags": ask_string,
         "one_video_per_photo": ask_yes_no,
+        "one_video_per_prompt": ask_yes_no,
         "telegram_account": ask_string,
         "notify_account": ask_string,
         "notify_on_critical": ask_yes_no,
         "notify_on_end": ask_yes_no,
         "delay_normal": ask_not_negative_float,
         "delay_spread": ask_not_negative_float,
+        "additional_metadata": ask_yes_no,
+        "quality": ask_not_negative_integers,
+        "max_width": ask_not_negative_integers,
+        "max_height": ask_not_negative_integers,
+        "openai_gpt": ask_yes_no,
     }
 
     @classmethod

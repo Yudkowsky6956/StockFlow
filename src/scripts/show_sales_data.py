@@ -9,7 +9,7 @@ from i18n import t
 from loguru import logger
 
 from src.core.global_config import DEBUG
-from src.interface.file_dialog import select_scv
+from src.interface.file_dialog import select_csv
 from .core_script import InfographicsScripts
 
 logging.getLogger('werkzeug').setLevel(logging.ERROR)   # HTTP запросы
@@ -187,7 +187,7 @@ class ShowSalesData(InfographicsScripts):
     @classmethod
     async def _run(cls):
         try:
-            sales_file = select_scv()
+            sales_file = select_csv()
         except RuntimeError as e:
             logger.error(e)
             return

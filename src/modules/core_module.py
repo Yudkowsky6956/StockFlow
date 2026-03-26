@@ -1,6 +1,12 @@
 import asyncio
+import traceback
+from pathlib import Path
 
+import aiohttp
+from pyrogram.enums import MessageEntityType
 from i18n import t
+import re
+import requests
 from loguru import logger as default_logger
 from pyrogram.errors import FloodWait
 from pyrogram.types import Message
@@ -8,8 +14,8 @@ from pyrogram.types import Message
 from src.core.database import Database
 from src.core.pyrogram.filters import contains
 from src.core.settings_mixin import SettingsMixin
+from src.core.syntx import locks
 from src.core.syntx.current_module import SyntxCurrentModule
-from src.core.syntx.event_lock import EventLock
 from src.core.syntx.exceptions import GenerationError
 from src.modules.vars import *
 
@@ -55,6 +61,9 @@ class CoreModule(SettingsMixin):
     def get_batch_size(cls):
         return cls.get_config().get("batch_size", 1)
 
+    @classmethod
+    async def init_locks(cls):
+        pass
 
 class SyntxModule(CoreModule):
     menu_message = MENU_MESSAGE
@@ -74,9 +83,8 @@ class SyntxModule(CoreModule):
     @classmethod
     async def init_locks(cls):
         config = cls.get_config()
+        cls.semaphore = None
         cls.semaphore = asyncio.Semaphore(config.get("batch_size", 1))
-        cls.syntx_lock = asyncio.Lock()
-        cls.event_lock = EventLock()
 
     @classmethod
     async def _handle_generation_error(cls, e: GenerationError, name: str, database: Database,  logger, mark=True, *args, **kwargs):
@@ -87,16 +95,85 @@ class SyntxModule(CoreModule):
             database.mark_error(name)
 
         if e.lock and e.delay:
-            cls.event_lock.turn_on()
+            locks.locks["event_lock"].turn_on()
 
         if e.delay:
             await asyncio.sleep(e.delay)
             if e.lock:
-                cls.event_lock.turn_off()
+                locks.locks["event_lock"].turn_off()
             return await cls.run(name, logger, database, mark, *args, **kwargs)
 
         if e.fatal:
+            default_logger.critical(str(e))
             raise e
+
+    @classmethod
+    async def download(cls, message: Message | list[Message], path: Path, logger):
+        if isinstance(message, list):
+            tasks = [
+                asyncio.create_task(
+                    cls.download_single(msg, path.with_stem(f"{path.stem}_{i}"), logger)
+                )
+                for i, msg in enumerate(message, start=1)
+            ]
+            return await asyncio.gather(*tasks)
+
+        return await cls.download_single(message, path, logger)
+
+    @classmethod
+    async def download_single(cls, message: Message, path: Path, logger):
+        # 1. Сначала пробуем достать скрытую ссылку из entities
+        url = cls._extract_hidden_url(message, logger)
+        if url:
+            return await cls._download_from_url(url, path)
+
+        # 2. Если никаких URL — качаем медиа Telegram
+        return await cls.bot().download(message, path, logger)
+
+    @staticmethod
+    def _extract_hidden_url(message: Message, logger) -> str | None:
+        """Ищет ссылки в сообщении"""
+        entities = message.caption_entities or message.entities or []
+        for entity in entities:
+            if entity.type == MessageEntityType.TEXT_LINK:
+                if entity.url:
+                    if entity.url.endswith(".mp4"):
+                        return entity.url
+                    elif entity.url.endswith(".png"):
+                        return entity.url
+                    else:
+                        try:
+                            response = requests.get(entity.url, timeout=10)
+                            if not response.ok:
+                                logger.error(f"HTTP Error: {response.status_code}")
+                                return None
+                            html_content = response.text
+
+                            pattern = r'const\s+videoUrl\s*=\s*"([^"]+)"'
+                            match = re.search(pattern, html_content)
+
+                            if match:
+                                escaped_url = match.group(1)
+                                # Заменяем \/ на /
+                                clean_url = escaped_url.replace('\\/', '/')
+                                return clean_url
+
+                        except Exception as e:
+                            default_logger.critical(str(e))
+                            traceback.print_exc()
+                            return None
+
+        return None
+
+    @staticmethod
+    async def _download_from_url(url: str, path: Path) -> Path:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                resp.raise_for_status()
+                data = await resp.read()
+
+        path.write_bytes(data)
+        return path
 
     @classmethod
     async def run_back(cls, name: str, database: Database, logger, mark=True, *args, **kwargs):
@@ -116,7 +193,7 @@ class SyntxModule(CoreModule):
         try:
             try:
                 async with cls.get_semaphore():
-                    await cls.event_lock.wait()
+                    await locks.locks["event_lock"].wait()
                     result = await asyncio.wait_for(
                         cls.run_back(
                             name,

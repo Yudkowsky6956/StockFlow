@@ -3,6 +3,8 @@ import asyncio
 from src.core.settings_mixin import SettingsMixin
 from src.core.stop_event import StopEvent
 from src.core.syntx.current_module import SyntxCurrentModule
+from src.core.syntx.event_lock import EventLock
+from src.core.syntx import locks
 from .vars import FLOWS_YML
 
 
@@ -25,6 +27,10 @@ class CoreFlow(SettingsMixin):
     async def _reset_modules(cls, modules):
         SyntxCurrentModule.reset()
         StopEvent.event = asyncio.Event()
+        locks.locks = {
+            "syntx_lock": asyncio.Lock(),
+            "event_lock": EventLock()
+        }
         for module in modules:
             await module.init_locks()
 

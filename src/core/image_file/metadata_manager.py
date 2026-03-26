@@ -1,10 +1,12 @@
 from pathlib import Path
 from typing import Optional
-
 import pyexiv2
+import logging
 
 from .vars import *
 
+# Инициализируем логгер, если он не настроен в основном проекте
+logger = logging.getLogger("src.core.image_file")
 
 class ImageMetadataManager:
     @classmethod
@@ -54,32 +56,10 @@ class ImageMetadataManager:
     def clear_metadata(path: Path):
         with pyexiv2.Image(str(path)) as image:
             image.clear_thumbnail()
-
-            # Получаем метаданные
-            exif_data = image.read_exif()
-            iptc_data = image.read_iptc()
-            xmp_data = image.read_xmp()
-
-            # Удаляем нужные теги из словарей, если они есть
-            for tag in [iptc_title_tag, iptc_object_tag, iptc_description_tag, iptc_keywords_tag]:
-                iptc_data.pop(tag, None)
-
-            for tag in [exif_title_tag, exif_description_tag, exif_keywords_tag]:
-                exif_data.pop(tag, None)
-
-            for tag in [xmp_title_tag, xmp_legacy_tag, xmp_description_tag, xmp_keywords_tag]:
-                xmp_data.pop(tag, None)
-
-            # Перезаписываем очищенные данные обратно
-            image.modify_exif(exif_data)
-            image.modify_iptc(iptc_data)
-            image.modify_xmp(xmp_data)
-
-        # with pyexiv2.Image(str(path)) as image:
-        #     image.clear_exif()
-        #     image.clear_iptc()
-        #     image.clear_xmp()
-        #     image.clear_thumbnail()
+            # Используем встроенные методы очистки для безопасности
+            image.clear_exif()
+            image.clear_iptc()
+            image.clear_xmp()
 
     @classmethod
     def path_to_metadata(cls, path: Path=None, metadata: tuple=None):
@@ -98,11 +78,17 @@ class ImageMetadataManager:
 
     @staticmethod
     def _get_metadata(path: Path) -> tuple[dict, ...]:
+        """Безопасное получение метаданных с обработкой ошибок кодировки."""
         with pyexiv2.Image(str(path)) as image:
-            return (
-                image.read_exif(),
-                #
-                # image.read_iptc(),
-                # pyexiv2.convert_xmp_to_iptc(pyexiv2.convert_exif_to_xmp(image.read_exif())),
-                # pyexiv2.convert_xmp_to_iptc(image.read_xmp())
-            )
+            try:
+                # Пытаемся прочитать в стандартной кодировке
+                return (image.read_exif(),)
+            except UnicodeDecodeError:
+                try:
+                    # Если UTF-8 упал, пробуем 'latin-1' (прочитает любые байты)
+                    logger.warning(f"Encoding error in {path.name}. Falling back to latin-1.")
+                    return (image.read_exif(encoding='latin-1'),)
+                except Exception as e:
+                    logger.error(f"Failed to read metadata for {path.name}: {e}")
+                    return ({},)
+

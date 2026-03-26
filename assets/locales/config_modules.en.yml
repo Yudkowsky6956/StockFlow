@@ -20,7 +20,18 @@ en:
       name: "Flags"
       message: "Enter flags for the module"
       description: "Adds these flags before the prompt to more precisely control generation (for example, --ar 16:9 in Midjourney sets the aspect ratio). Separate flags with spaces."
-
+    quality:
+      name: "Photo quality"
+      message: "Enter photo quality in percents"
+      description: "By default - 75"
+    max_width:
+      name: "Max width"
+      message: "Enter photo's max width in pixels"
+      description: "By default - 512"
+    max_height:
+      name: "Max height"
+      message: "Enter photo's max height in pixels"
+      description: "By default - 288"
   Veo:
     name: "Veo"
     choice: "⭕  Veo"
@@ -44,6 +55,10 @@ en:
   GPT:
     name: "GPT"
     choice: "💡 GPT"
+
+  OpenAIGPT:
+    name: "OpenAI GPT"
+    choice: "⭐  OpenAI GPT"
 
   Midjourney:
     name: "MidJourney"

@@ -20,7 +20,18 @@ ru:
       name: "Флаги"
       message: "Введите флаги для модуля"
       description: "Добавляет данные флаги перед промптом, чтобы точнее контролировать генерацию. (например --ar 16:9 у Midjourney задаёт отношение сторон при генерации). Писать через пробел."
-
+    quality:
+      name: "Качество фото"
+      message: "Введите качество фото в процентах"
+      description: "По умолчанию — 75"
+    max_width:
+      name: "Максимальная ширина"
+      message: "Введите максимальную ширину фото в пикселях"
+      description: "По умолчанию — 512"
+    max_height:
+      name: "Максимальная высота"
+      message: "Введите максимальную высоту фото в пикселях"
+      description: "По умолчанию — 288"
   Veo:
     name: "Veo"
     choice: "⭕  Veo"
@@ -44,6 +55,10 @@ ru:
   GPT:
     name: "GPT"
     choice: "💡 GPT"
+
+  OpenAIGPT:
+    name: "OpenAI GPT"
+    choice: "⭐  OpenAI GPT"
 
   Midjourney:
     name: "MidJourney"

@@ -10,7 +10,7 @@ from playwright.async_api import Error as PlaywrightError, TimeoutError as Playw
 from tqdm.asyncio import tqdm_asyncio
 
 import src.core.global_config as config
-from src.interface.file_dialog import select_scv
+from src.interface.file_dialog import select_csv
 from .core_script import InfographicsScripts
 
 CACHE_DIR = Path("cached")
@@ -128,7 +128,7 @@ class ParseSalesData(InfographicsScripts):
         lock = asyncio.Lock()
 
         try:
-            sales_file: Path = select_scv()
+            sales_file: Path = select_csv()
         except RuntimeError as e:
             logger.error(e)
             return

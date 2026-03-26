@@ -1,15 +1,13 @@
 import asyncio
-import re
 from pathlib import Path
 
-import aiohttp
 from i18n import t
-from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 
 from src.core.database import Database
 from src.core.pyrogram.filters import contains
 from src.modules.core_module import AgentModule
+from src.core.syntx import locks
 from src.modules.vars import *
 from src.utils.sentances import compile_prompt
 
@@ -23,70 +21,17 @@ class CoreDesignModule(AgentModule):
     flags = ""
 
     @classmethod
-    async def download(cls, message: Message | list[Message], path: Path):
-        if isinstance(message, list):
-            tasks = [
-                asyncio.create_task(
-                    cls.download_single(msg, path.with_stem(f"{path.stem}_{i}"))
-                )
-                for i, msg in enumerate(message, start=1)
-            ]
-            return await asyncio.gather(*tasks)
-
-        return await cls.download_single(message, path)
-
-    @classmethod
-    async def download_single(cls, message: Message, path: Path):
-        # 1. Сначала пробуем достать скрытую ссылку из entities
-        url = cls._extract_hidden_url(message)
-        if url:
-            return await cls._download_from_url(url, path)
-
-        # 2. Если никаких URL — качаем медиа Telegram
-        return await cls.bot().download(message, path)
-
-    @staticmethod
-    def _extract_hidden_url(message: Message) -> str | None:
-        """Ищет ссылки в сообщении"""
-
-        for entity in message.caption_entities:
-            if entity.type == MessageEntityType.TEXT_LINK:
-                return entity.url
-        return None
-
-    @staticmethod
-    def _extract_text_url(message: Message) -> str | None:
-        """Ищет прямой URL с расширением."""
-        text = message.text or message.caption or ""
-        url_regex = r"(https?://[^\s]+)"
-        matches = re.findall(url_regex, text)
-        for url in matches:
-            if url.lower().endswith(IMAGE_EXT):
-                return url
-        return None
-
-    @staticmethod
-    async def _download_from_url(url: str, path: Path) -> Path:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                resp.raise_for_status()
-                data = await resp.read()
-
-        path.write_bytes(data)
-        return path
-
-    @classmethod
     async def _run(cls, name: str, logger, prompt: str, database: Database, destination: Path, upscale=True):
         config = cls.get_config()
         model_and_name = f"{config["name"]}_{name}"
         prompt = compile_prompt(model_and_name, " ".join([cls.flags, prompt]))
         message = await cls._generate(prompt=prompt, logger=logger, upscale=upscale)
-        return await cls.download(message, destination / f"{model_and_name}.jpg")
+        return await cls.download(message, destination / f"{model_and_name}.jpg", logger)
 
 class NanoModule(CoreDesignModule):
     @classmethod
     async def _generate(cls, prompt: str, logger, upscale=False) -> Message:
-        async with cls.syntx_lock:
+        async with locks.locks["syntx_lock"]:
             await cls.start()
             prompt_message = await cls.bot().send(text=prompt, logger=logger)
             generating_task = asyncio.create_task(cls.bot().wait_for(
@@ -112,7 +57,7 @@ class MidjourneyModule(CoreDesignModule):
 
     @classmethod
     async def _generate(cls, prompt: str, logger, upscale=True) -> list[Message]:
-        async with cls.syntx_lock:
+        async with locks.locks["syntx_lock"]:
             await cls.start()
             prompt_message = await cls.bot().send(text=prompt, logger=logger)
             generating_task = asyncio.create_task(cls.bot().wait_for(
@@ -130,7 +75,7 @@ class MidjourneyModule(CoreDesignModule):
             request_message=generating_message,
             button_map=MIDJOURNEY_DESIGN_ORIGINAL_BUTTON_MAP
         )
-        async with cls.syntx_lock:
+        async with locks.locks["syntx_lock"]:
             selected_tasks = [
                 asyncio.create_task(cls.bot().wait_for(
                     message=prompt_message,
@@ -147,7 +92,7 @@ class MidjourneyModule(CoreDesignModule):
 
             selected_messages = await asyncio.gather(*selected_tasks)
         if upscale:
-            async with cls.syntx_lock:
+            async with locks.locks["syntx_lock"]:
                 upscaled_tasks = [
                     asyncio.create_task(cls.bot().wait_for(
                         message=prompt_message,

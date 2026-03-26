@@ -95,9 +95,6 @@ class GeneratePhotosFromPrompts(CoreFlow):
                     finally:
                         stop_watcher.cancel()
 
-        except GenerationError as e:
-            return []
-
         except Exception as e:
             default_logger.critical(str(e))
             traceback.print_exc()

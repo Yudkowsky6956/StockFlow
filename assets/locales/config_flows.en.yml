@@ -24,7 +24,14 @@ en:
       name: "One Video per Photo"
       message: "One video per photo"
       description: "Whether to generate only one video from each photo. If set to 'No', all video modules will generate a video from each photo. If set to 'Yes', only one video module will be used per photo."
-
+    one_video_per_prompt:
+      name: "One Video per Prompt"
+      message: "One video per photo"
+      description: "Whether to generate only one video from each prompt. If set to 'No', all video modules will generate a video from each prompt. If set to 'Yes', only one video module will be used per prompt."
+    additional_metadata:
+      name: "Additional Metadata"
+      message: "Additional metadata"
+      description: "Whether flow should additionally generate metadata for additional photos."
 
   GenerateVideosFromPrompts:
     name: "Videos from prompts"
@@ -65,8 +72,13 @@ en:
       name: "Template for GPT"
       message: "Enter template for GPT"
       description: "Preprocessing prompt. It must contain {keywords_amount} - where goes amount of keywords to generate. It should contain instruction for GPT, that it must return JSON-code with these parameters: \"description\", \"keywords\"."
+    openai_gpt:
+      name: "Use OpenAI GPT"
+      message: "Whether flow should use OpenAI GPT"
+      description: "If yes, flow will use official OpenAI GPT, else it will use SyntxAI GPT."
     progress_bar: "Metadata generation"
     progress_unit: "photo"
+
 
   GeneratePromptsPhotosVideos:
     name: "Photo from prompts, video from photos"

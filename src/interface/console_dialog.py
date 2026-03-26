@@ -43,23 +43,45 @@ def ask_new_database(message: str = "info.interface.ask.ask_new_database", **kwa
 def ask_conversation_url(message: str = "info.interface.ask.conversation_url.message", long_instructions: str = "info.interface.ask.conversation_url.long", **kwargs) -> str:
     return ask_string(message, long_instructions=long_instructions, **kwargs)
 
+def ask_database_name(message: str = "info.interface.ask.ask_new_database") -> str:
+    """
+    Запрашивает у пользователя имя новой базы данных.
+    """
+    name = inquirer.text(
+        message=f"{t(message)}:"
+    ).execute()
+
+    return name.strip() if name else None
+
 def ask_database(message: str = "info.interface.ask.database", default=None, back=False, **kwargs) -> str:
     """Выбор базы данных."""
     back_message = t("menu.back")
     create_new = t("info.interface.ask.new_database")
+
     all_databases = [database.stem for database in DATABASE_FOLDER.glob("*.db")]
     choices = all_databases + [create_new]
+
     if default:
         default = t(default)
+
     if back:
         choices = [back_message] + choices
-    answer = inquirer.select(message=f"{t(message)}:", choices=choices, default=default, **kwargs).execute()
+
+    answer = inquirer.select(
+        message=f"{t(message)}:",
+        choices=choices,
+        default=default,
+        **kwargs
+    ).execute()
+
     if answer == create_new:
-        return ask_new_database()
+        return ask_database_name()
+
     elif answer == back_message:
         raise KeyboardInterrupt
-    else:
-        return answer
+
+    return answer
+
 
 
 def ask_video_modules(message: str = "info.interface.ask.video_modules", default=None, **kwargs) -> list:
@@ -92,10 +114,10 @@ def ask_photo_modules(message: str = "info.interface.ask.photo_modules", default
         raise KeyboardInterrupt
     return answer
 
-def ask_double(message: str = "info.interface.ask.double.message", **kwargs) -> bool:
+def ask_double(message: str = "info.interface.ask.double_message", **kwargs) -> bool:
     """Выбор делать двойные ключи или нет"""
-    single = t("info.interface.ask.double.single")
-    double = t("info.interface.ask.double.double")
+    single = t("info.interface.ask.double_false")
+    double = t("info.interface.ask.double_true")
 
     answer = inquirer.select(message=f"{t(message)}:", choices=[single, double], default=single, **kwargs).execute()
     return answer == double

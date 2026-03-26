@@ -44,8 +44,8 @@ def select_txt(title: str = "info.interface.select.txt", filetype: str = "info.i
     """Выбор .txt файла."""
     return select_file(title=t(title), filetypes=[(t(filetype), "*.txt")], **kwargs)
 
-def select_scv(title: str = "info.interface.select.csv", filetype: str = "info.interface.select.csv_filetype", **kwargs):
-    """Выбор .scv файла."""
+def select_csv(title: str = "info.interface.select.csv", filetype: str = "info.interface.select.csv_filetype", **kwargs):
+    """Выбор .csv файла."""
     return select_file(title=t(title), filetypes=[(t(filetype), "*.csv")], **kwargs)
 
 def select_photos(title: str = "info.interface.select.photos", filetype: str = "info.interface.select.photos_filetype", **kwargs):
